@@ -20,4 +20,4 @@ khoá thành luật, và có các lỗ kiến trúc mà phản biện cấp dòn
 ## Hệ quả
 Mọi phiên AI tốn thêm vài phút đọc bàn giao. Đổi lại: không phiên nào làm lệch ý tưởng mà không bị phát hiện.
 
-OWNER-APPROVED: 2026-09-30 (lệnh Owner trong chat: "xây bộ luật kiến trúc tối cao… luật bàn giao"; xác nhận cuối bằng việc Owner merge PR)
+OWNER-APPROVED: 2026-09-30 — nguồn: Owner ra lệnh trong chat Claude (Project MINH TRÍ TRÍ TUỆ, phiên claude-chat-2026-09-30-law): "XÂY BỘ LUẬT KIẾN TRÚC TỐI CAO, BẢO VỆ Ý TƯỞNG KIẾN TRÚC. VÀ CÓ LUẬT BÀN GIAO". Owner tự tay bấm merge PR (Chương V.5).

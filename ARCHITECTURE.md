@@ -23,7 +23,7 @@ domains.py ── mở MIỀN (Tầng 2): 9 câu hỏi bắt buộc, khởi đ�
 epistemics.py ── mọi phát biểu có loại + độ tin ≤ trần bằng chứng
    │
    ▼
-seats.py ── ĐỀ XUẤT ▸ PHẢN BIỆN ▸ TRỌNG TÀI (3 phiên độc lập)
+seats.py ── ĐỀ XUẤT ▸ PHẢN BIỆN ▸ TRỌNG TÀI (mã hiện kiểm 3 phiên; luật đòi khác nhà cung cấp — ⚠ V2)
    │
    ▼
 ledger.py ── DỰ ĐOÁN đăng ký trước → Owner làm → KẾT QUẢ thật → chấm (Brier / trúng khoảng)
@@ -73,5 +73,5 @@ Dữ liệu thô lớn (video, audio, hàng triệu event) **không** vào GitHu
 - **v0.2 (hiện tại):** sổ bài học & kỹ năng có phiên bản, đình chỉ, rollback; benchmark niêm phong `tang1-core-v1` (đề THỬ, chưa đủ bầu champion). Sửa theo phản biện Grok PR #1.
 - **v0.2.4:** Luật Kiến trúc Tối cao + Luật Bàn giao + CI thực thi (ADR 0001).
 - **v0.3:** sửa vi phạm V1–V3 (BLOCKING) trong `docs/NO_VI_HIEN.md`; lệnh CLI ghi bài học/kỹ năng (bắt 3 mã phiên); đề benchmark do AI khác soạn.
-- **v0.4:** L7 meta-learning (đo phương pháp học nào cho dự đoán tốt hơn); L8 self-repair qua PR sandbox + rollback.
+- **v0.5:** L7 meta-learning (đo phương pháp học nào cho dự đoán tốt hơn); L8 self-repair qua PR sandbox + rollback.
 - **v0.4:** Owner giao miền đầu tiên → chạy vòng thật đầu tiên.

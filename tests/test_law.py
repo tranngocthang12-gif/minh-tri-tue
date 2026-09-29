@@ -89,6 +89,18 @@ class TestLawAmendmentGate(unittest.TestCase):
         self.amend(d, run, None)
         self.assertEqual(self.check(d, base), 1)
 
+    def test_amend_approval_without_source_fails(self):
+        d, run, base = self.repo()
+        self.amend(d, run, "# ADR 0002\nOWNER-APPROVED: 2026-10-01\n")
+        self.assertEqual(self.check(d, base), 1)
+
+    def test_constitution_edit_needs_adr(self):
+        d, run, base = self.repo()
+        open(os.path.join(d, "CONSTITUTION.md"), "w", encoding="utf-8").write("sửa lén\n")
+        run("git", "add", "-A")
+        run("git", "-c", "user.email=a@b", "-c", "user.name=t", "commit", "-qm", "c")
+        self.assertEqual(self.check(d, base), 1)
+
     def test_amend_with_unapproved_adr_fails(self):
         d, run, base = self.repo()
         self.amend(d, run, "# ADR 0002\nChưa duyệt.\n")
@@ -96,8 +108,66 @@ class TestLawAmendmentGate(unittest.TestCase):
 
     def test_amend_with_owner_approved_adr_passes(self):
         d, run, base = self.repo()
-        self.amend(d, run, "# ADR 0002\nOWNER-APPROVED: 2026-10-01\n")
+        self.amend(d, run, "# ADR 0002\nOWNER-APPROVED: 2026-10-01 — nguồn: chat Owner\n")
         self.assertEqual(self.check(d, base), 0)
+
+
+class TestHandoverGate(unittest.TestCase):
+    """Điều 14: dòng bàn giao giả / cổ / trùng session / thiếu MỞ PHIÊN bị chặn."""
+
+    def repo(self):
+        d = tempfile.mkdtemp()
+        shutil.copy(os.path.join(ROOT, "LUAT_KIEN_TRUC_TOI_CAO.md"), d)
+        os.makedirs(os.path.join(d, "brain", "handover"))
+        shutil.copy(os.path.join(ROOT, "brain", "law.lock"), os.path.join(d, "brain"))
+        open(os.path.join(d, "brain", "handover", "log.jsonl"), "w").close()
+        self.run_ = lambda *a: subprocess.run(a, cwd=d, check=True, capture_output=True)
+        self.run_("git", "init", "-q", "-b", "main")
+        self.commit(d, "c0")
+        self.commit(d, "c1", touch="a.txt")
+        base = self.head(d)
+        self.run_("git", "checkout", "-qb", "f")
+        return d, base
+
+    def head(self, d):
+        return subprocess.run(["git", "rev-parse", "HEAD"], cwd=d, capture_output=True, text=True).stdout.strip()
+
+    def commit(self, d, msg, touch=None):
+        if touch:
+            open(os.path.join(d, touch), "a").write(msg)
+        self.run_("git", "add", "-A")
+        self.run_("git", "-c", "user.email=a@b", "-c", "user.name=t", "commit", "-qm", msg, "--allow-empty")
+
+    def add_entry(self, d, started_from, session="s1"):
+        log = HandoverLog(os.path.join(d, "brain", "handover", "log.jsonl"))
+        law = law_sha256(ROOT)
+        log.add(entry(law, session=session, started_from=started_from), law)
+
+    def check(self, d, base, body="MỞ PHIÊN · provider: x"):
+        env = dict(os.environ, PR_BODY=body)
+        return subprocess.run([sys.executable, os.path.join(ROOT, "tools", "check_handover.py"), base],
+                              cwd=d, capture_output=True, text=True, env=env).returncode
+
+    def test_valid_entry_passes(self):
+        d, base = self.repo()
+        self.add_entry(d, base); self.commit(d, "w", touch="b.txt")
+        self.assertEqual(self.check(d, base), 0)
+
+    def test_old_started_from_rejected(self):
+        d, base = self.repo()
+        old = subprocess.run(["git", "rev-parse", "HEAD~1"], cwd=d, capture_output=True, text=True).stdout.strip()
+        self.add_entry(d, old); self.commit(d, "w", touch="b.txt")
+        self.assertEqual(self.check(d, base), 1)
+
+    def test_missing_open_line_rejected(self):
+        d, base = self.repo()
+        self.add_entry(d, base); self.commit(d, "w", touch="b.txt")
+        self.assertEqual(self.check(d, base, body="không có dòng mở phiên"), 1)
+
+    def test_no_entry_rejected(self):
+        d, base = self.repo()
+        self.commit(d, "w", touch="b.txt")
+        self.assertEqual(self.check(d, base), 1)
 
 
 if __name__ == "__main__":

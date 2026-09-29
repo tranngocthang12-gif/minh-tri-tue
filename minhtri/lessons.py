@@ -2,13 +2,15 @@
 
 BÀI HỌC  = điều rút ra từ kết quả; luôn trỏ về dự đoán ĐÃ CHẤM.
 KỸ NĂNG  = bài học đã qua cổng: TOÀN BỘ dự đoán của các bài học đó (không chọn lọc)
-           đủ đúng + ba ghế (ba phiên khác nhau) ACCEPT — trọng tài gọi TRONG hàm.
+           đủ đúng + ba ghế ACCEPT — trọng tài gọi TRONG hàm. (Mã kiểm ba phiên khác nhau;
+           Luật Tối cao Điều 6 đòi khác nhà cung cấp — chưa kiểm, ⚠ V2.)
            Dự đoán gắn tên kỹ năng (ledger skill=...) KHÔNG BAO GIỜ giúp nâng cấp;
            chúng chỉ dùng để GIÁM SÁT.
 Thành công cũng phải bị phản biện:
-  - recheck: dự đoán gốc + dự đoán cùng miền gắn tên kỹ năng rớt ngưỡng → SUSPENDED;
-  - im lặng không phải còn đúng: sau `stale_after` kết quả mới cùng miền mà kỹ năng
-    không có kết quả mới nào gắn tên → STALE.
+  - recheck: dự đoán gốc + dự đoán cùng miền gắn tên kỹ năng có kết quả SAU lần nâng gần nhất
+    + dự đoán gắn tên quá hạn chưa chấm (tính trượt) rớt ngưỡng → SUSPENDED;
+  - im lặng không phải còn đúng: trong `stale_after` kết quả GẦN NHẤT cùng miền (cửa sổ
+    trượt) không có kết quả nào gắn tên kỹ năng → STALE. Điểm danh một lần không đủ.
 Kết quả chấm trễ hạn (late) tính là trượt tối đa ở mọi phép chấm của sổ này.
 Rollback phải qua cổng, ba ghế lại, không rớt giám sát; thoát STALE cần kết quả mới gắn tên.
 

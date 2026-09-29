@@ -38,7 +38,9 @@ L6 Tự phản biện · L7 Học cách học · L8 Tự sửa (phát hiện →
 **Không lên cấp vì đọc nhiều — chỉ lên cấp khi có bằng chứng của cấp đó.**
 
 ## 5. Ba ghế
-Đề xuất · Phản biện · Trọng tài — **ba phiên khác nhau**. Không ai tự đề xuất, tự khen, tự duyệt.
+Đề xuất · Phản biện · Trọng tài. Người phản biện phải là **nhà cung cấp AI khác** người đề xuất, đăng phản biện dưới
+danh tính kiểm được (GitHub hoặc Owner dán nguyên văn); trọng tài cuối là **Owner** (Luật Tối cao, Điều 6).
+Mã hiện mới kiểm được "ba phiên khác nhau" — chưa kiểm khác nhà cung cấp (⚠ V2).
 Trọng tài phán theo: luận điểm → bằng chứng → phản chứng → phép thử → quyết định.
 
 ## 6. AI là nhà cung cấp, GitHub là bộ não

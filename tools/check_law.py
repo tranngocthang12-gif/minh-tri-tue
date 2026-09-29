@@ -1,7 +1,7 @@
 """CI: Luật Kiến trúc Tối cao (Chương IV, V).
 
 - Băm luật phải khớp brain/law.lock.
-- Nếu luật hoặc khoá đổi so với commit gốc → cùng PR phải THÊM một ADR mới trong docs/adr/
+- Nếu luật, khoá hoặc CONSTITUTION.md đổi so với commit gốc → cùng PR phải THÊM một ADR mới trong docs/adr/
   có dòng 'OWNER-APPROVED: <yyyy-mm-dd>', và khoá phải trỏ tới ADR đó.
 Dùng: python tools/check_law.py <base-ref>
 """
@@ -16,7 +16,8 @@ from minhtri.handover import HandoverError, check_law  # noqa: E402
 from tools.check_append_only import resolve_base  # noqa: E402
 
 LAW, LOCK = "LUAT_KIEN_TRUC_TOI_CAO.md", "brain/law.lock"
-APPROVED = re.compile(r"^OWNER-APPROVED:\s*\d{4}-\d{2}-\d{2}", re.M)
+PROTECTED = {LAW, LOCK, "CONSTITUTION.md"}
+APPROVED = re.compile(r"^OWNER-APPROVED:\s*\d{4}-\d{2}-\d{2}\s+—\s+\S", re.M)  # phải ghi nguồn (Chương V.5)
 
 
 def changed(base: str, status: str = "ACMRD") -> list:
@@ -35,8 +36,10 @@ def main(base) -> int:
         print("Không có commit gốc — chỉ kiểm khoá."); return 0
     files = changed(base)
     touched = {p[-1] for p in files}
-    if not ({LAW, LOCK} & touched):
-        print("PR không sửa luật."); return 0
+    hit = PROTECTED & touched
+    if not hit:
+        print("PR không sửa tệp được bảo vệ."); return 0
+    print(f"PR sửa tệp được bảo vệ: {', '.join(sorted(hit))}")
     added_adr = [p[-1] for p in files if p[0] == "A" and p[-1].startswith("docs/adr/") and p[-1].endswith(".md")]
     ok = [f for f in added_adr if APPROVED.search(open(f, encoding="utf-8").read())]
     if not ok:

@@ -8,7 +8,7 @@
   "open_hypotheses": [],
   "pending_decisions": [],
   "known_blind_spots": [
-    "Vi phạm luật đã biết V1–V9 (docs/NO_VI_HIEN.md) — 3 BLOCKING: cổng không so tỷ lệ nền, ba ghế không kiểm khác nhà cung cấp, 'đoán trước' chưa chứng minh bằng commit.",
+    "Vi phạm luật đã biết (docs/NO_VI_HIEN.md) — 5 BLOCKING: V1 cổng không so tỷ lệ nền, V2 ba ghế không kiểm khác nhà cung cấp, V3 'đoán trước' chưa chứng minh bằng commit, V11 main chưa bảo vệ nhánh, V12 AI dùng tài khoản Owner.",
     "Chưa có kết quả thật nào — mọi hiểu biết hiện ở cấp L0/L1.",
     "Chỉ có một đề benchmark (tang1-core-v1, đề thử): claude là tác giả, grok đã đọc đề khi phản biện → chỉ chatgpt, gemini thi được. Chưa thể bầu champion.",
     "Nguồn kết quả (source) trong sổ dự đoán do Owner khai — bộ não offline không tự kiểm được nguồn đo.",
@@ -16,7 +16,7 @@
     "Cấp L2 (explained_conditions) do người gọi tự khai — chưa nối với khung inquiry (v0.3)."
   ],
   "real_outcome_status": "NONE",
-  "next_bottleneck": "Owner duyệt PR Luật Kiến trúc Tối cao; sau đó v0.3 sửa V1–V3.",
+  "next_bottleneck": "Owner bật bảo vệ nhánh main (V11), quyết tài khoản riêng cho AI (V12), merge PR #3; sau đó v0.3 sửa V1–V3.",
   "governance": {
     "law": "LUAT_KIEN_TRUC_TOI_CAO.md",
     "law_lock": "brain/law.lock",
