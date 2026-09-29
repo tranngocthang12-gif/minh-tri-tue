@@ -1,6 +1,6 @@
 {
   "project": "MINH TRÍ TUỆ — Universal Intelligence OS",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "canonical_brain": "GITHUB_REPOSITORY",
   "operating_mode": "ADVISE_ONLY",
   "owner_acts_in_world": true,
@@ -9,8 +9,9 @@
   "pending_decisions": [],
   "known_blind_spots": [
     "Chưa có kết quả thật nào — mọi hiểu biết hiện ở cấp L0/L1.",
-    "Chưa có benchmark provider nào đủ mẫu — chưa có champion."
+    "Benchmark tang1-core-v1 do claude soạn: claude không được chấm trên đề này; cần AI khác soạn đề để thi claude.",
+    "Chưa provider nào có đủ 5 lần thi mỗi việc — chưa có champion."
   ],
   "real_outcome_status": "NONE",
-  "next_bottleneck": "Owner giao mục tiêu đầu tiên → mở miền → điền khung THỰC TRẠNG."
+  "next_bottleneck": "Chạy tang1-core-v1 cho chatgpt, gemini, grok; Owner giao mục tiêu đầu tiên để mở miền."
 }

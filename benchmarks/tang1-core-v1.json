@@ -1,0 +1,147 @@
+{
+  "id": "tang1-core-v1",
+  "version": 1,
+  "authors": [
+    "claude"
+  ],
+  "instructions": "Bài thi năng lực lõi Tầng 1: xếp loại phát biểu (research), tìm lỗi lập luận (critique), tính toán (quant). Trả lời ngắn, đúng định dạng: choice là một mã, set là mảng mã, number là một số.",
+  "key_sha256": "437cac1e27e224121c5ec0e47169dc4d5a991331d4a2dbf65ab24b18da7e0467",
+  "items": [
+    {
+      "id": "E1",
+      "task": "research",
+      "type": "choice",
+      "options": [
+        "FACT",
+        "OBSERVATION",
+        "INFERENCE",
+        "HYPOTHESIS",
+        "PREDICTION",
+        "OPINION",
+        "UNKNOWN"
+      ],
+      "prompt": "Xếp loại phát biểu: \"Theo YouTube Analytics, video A đạt 12.400 lượt xem sau 48 giờ.\""
+    },
+    {
+      "id": "E2",
+      "task": "research",
+      "type": "choice",
+      "options": [
+        "FACT",
+        "OBSERVATION",
+        "INFERENCE",
+        "HYPOTHESIS",
+        "PREDICTION",
+        "OPINION",
+        "UNKNOWN"
+      ],
+      "prompt": "Xếp loại phát biểu: \"Nếu đổi thumbnail sang ảnh cận mặt, CTR của video B sẽ trên 6% trong 7 ngày tới.\""
+    },
+    {
+      "id": "E3",
+      "task": "research",
+      "type": "choice",
+      "options": [
+        "FACT",
+        "OBSERVATION",
+        "INFERENCE",
+        "HYPOTHESIS",
+        "PREDICTION",
+        "OPINION",
+        "UNKNOWN"
+      ],
+      "prompt": "Xếp loại phát biểu: \"Có thể khán giả kênh này thích nhạc chậm hơn nhạc nhanh; cần thử mới biết.\""
+    },
+    {
+      "id": "E4",
+      "task": "research",
+      "type": "choice",
+      "options": [
+        "FACT",
+        "OBSERVATION",
+        "INFERENCE",
+        "HYPOTHESIS",
+        "PREDICTION",
+        "OPINION",
+        "UNKNOWN"
+      ],
+      "prompt": "Xếp loại phát biểu: \"Tôi thấy tông màu xanh đẹp hơn tông màu đỏ.\""
+    },
+    {
+      "id": "C1",
+      "task": "critique",
+      "type": "set",
+      "options": [
+        "CORRELATION_AS_CAUSE",
+        "SMALL_SAMPLE",
+        "SURVIVORSHIP",
+        "MEANS_AS_GOAL",
+        "IRREVERSIBLE_BIG_BET",
+        "NO_KILL_CRITERIA",
+        "LEAKAGE",
+        "NONE"
+      ],
+      "prompt": "Tìm TẤT CẢ lỗi trong đề xuất: \"5 kênh đứng top đều đăng video mỗi ngày, vậy đăng mỗi ngày là nguyên nhân giúp kênh lên top. Đề xuất: vay 200 triệu thuê đội sản xuất để đăng mỗi ngày liên tục 12 tháng.\""
+    },
+    {
+      "id": "C2",
+      "task": "critique",
+      "type": "set",
+      "options": [
+        "CORRELATION_AS_CAUSE",
+        "SMALL_SAMPLE",
+        "SURVIVORSHIP",
+        "MEANS_AS_GOAL",
+        "IRREVERSIBLE_BIG_BET",
+        "NO_KILL_CRITERIA",
+        "LEAKAGE",
+        "NONE"
+      ],
+      "prompt": "Tìm TẤT CẢ lỗi trong báo cáo: \"Sau khi xem kết quả tuần trước, chúng tôi ghi dự đoán rằng thumbnail màu đỏ sẽ thắng — và nó đã thắng 3/3 lần. Mục tiêu quý: đạt 100.000 subscriber bằng mọi cách.\""
+    },
+    {
+      "id": "C3",
+      "task": "critique",
+      "type": "set",
+      "options": [
+        "CORRELATION_AS_CAUSE",
+        "SMALL_SAMPLE",
+        "SURVIVORSHIP",
+        "MEANS_AS_GOAL",
+        "IRREVERSIBLE_BIG_BET",
+        "NO_KILL_CRITERIA",
+        "LEAKAGE",
+        "NONE"
+      ],
+      "prompt": "Tìm TẤT CẢ lỗi trong kế hoạch: \"Thử 2 kiểu mở đầu video, mỗi kiểu 20 video, chia ngẫu nhiên, dự đoán đã đăng ký trước; nếu sau 40 video chênh lệch giữ khán giả dưới 2 điểm % thì dừng.\" (Nếu không có lỗi, chọn NONE.)"
+    },
+    {
+      "id": "Q1",
+      "task": "quant",
+      "type": "number",
+      "tolerance": 0.0001,
+      "prompt": "Dự đoán xác suất 0,8 cho sự kiện 'có'; thực tế xảy ra 'có'. Điểm Brier là bao nhiêu?"
+    },
+    {
+      "id": "Q2",
+      "task": "quant",
+      "type": "number",
+      "tolerance": 0.01,
+      "prompt": "Video có 200.000 lượt xem kiếm tiền, RPM = 1,5 USD (USD trên 1.000 lượt xem). Doanh thu bao nhiêu USD?"
+    },
+    {
+      "id": "Q3",
+      "task": "quant",
+      "type": "number",
+      "tolerance": 0.01,
+      "prompt": "Doanh thu 300 USD, chi phí sản xuất 180 USD, công cụ/API 40 USD. Lợi nhuận đóng góp bao nhiêu USD?"
+    },
+    {
+      "id": "Q4",
+      "task": "quant",
+      "type": "number",
+      "tolerance": 0.001,
+      "prompt": "Đòn bẩy = giá trị × xác suất × hệ số ưu tiên ÷ chi phí (việc đảo ngược được, không phạt). Giá trị 100, xác suất 0,5, loại 'loại lỗi đang có' hệ số 1,2, chi phí 20. Đòn bẩy bằng bao nhiêu?"
+    }
+  ]
+}

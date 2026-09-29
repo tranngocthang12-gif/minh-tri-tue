@@ -13,3 +13,5 @@ STATE = os.path.join(BRAIN, "state.json")
 def load_state() -> dict:
     with open(STATE, encoding="utf-8") as f:
         return json.load(f)
+LESSONS = os.path.join(BRAIN, "lessons", "book.jsonl")
+BENCHMARKS = os.path.join(ROOT, "benchmarks")

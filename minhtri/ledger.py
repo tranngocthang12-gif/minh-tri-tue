@@ -104,7 +104,8 @@ class PredictionLedger:
         return self._append({"type": "RESOLUTION", "prediction_id": pid,
                              "outcome": outcome, "source": source, "resolved_at": now_iso()})
 
-    def score(self, domain: Optional[str] = None, provider: Optional[str] = None) -> Score:
+    def score(self, domain: Optional[str] = None, provider: Optional[str] = None,
+              ids: Optional[List[str]] = None) -> Score:
         entries = self.entries()
         preds = {e["id"]: e for e in entries if e["type"] == "PREDICTION"}
         bs, hits = [], []
@@ -112,6 +113,8 @@ class PredictionLedger:
             if e["type"] != "RESOLUTION":
                 continue
             p = preds[e["prediction_id"]]
+            if ids is not None and p["id"] not in ids:
+                continue
             if domain and p["domain"] != domain:
                 continue
             if provider and p["provider"] != provider:
