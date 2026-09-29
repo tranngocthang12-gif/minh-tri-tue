@@ -1,0 +1,16 @@
+{
+  "project": "MINH TRÍ TUỆ — Universal Intelligence OS",
+  "version": "0.1.0",
+  "canonical_brain": "GITHUB_REPOSITORY",
+  "operating_mode": "ADVISE_ONLY",
+  "owner_acts_in_world": true,
+  "active_domains": [],
+  "open_hypotheses": [],
+  "pending_decisions": [],
+  "known_blind_spots": [
+    "Chưa có kết quả thật nào — mọi hiểu biết hiện ở cấp L0/L1.",
+    "Chưa có benchmark provider nào đủ mẫu — chưa có champion."
+  ],
+  "real_outcome_status": "NONE",
+  "next_bottleneck": "Owner giao mục tiêu đầu tiên → mở miền → điền khung THỰC TRẠNG."
+}

@@ -1,0 +1,25 @@
+{
+  "champions": {},
+  "providers": {
+    "chatgpt": {
+      "failures": [],
+      "model": "unspecified",
+      "scores": {}
+    },
+    "claude": {
+      "failures": [],
+      "model": "unspecified",
+      "scores": {}
+    },
+    "gemini": {
+      "failures": [],
+      "model": "unspecified",
+      "scores": {}
+    },
+    "grok": {
+      "failures": [],
+      "model": "unspecified",
+      "scores": {}
+    }
+  }
+}
