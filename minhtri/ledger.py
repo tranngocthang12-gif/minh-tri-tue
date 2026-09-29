@@ -29,6 +29,16 @@ class Score:
         return self.__dict__.copy()
 
 
+def merge_scores(*scores: "Score") -> "Score":
+    """Gộp nhiều phép chấm (trung bình có trọng số theo số mẫu)."""
+    bn = sum(x.binary_n for x in scores)
+    rn = sum(x.range_n for x in scores)
+    brier = sum((x.brier or 0) * x.binary_n for x in scores) / bn if bn else None
+    hit = sum((x.range_hit_rate or 0) * x.range_n for x in scores) / rn if rn else None
+    return Score(resolved=sum(x.resolved for x in scores), binary_n=bn, brier=brier,
+                 range_n=rn, range_hit_rate=hit)
+
+
 class PredictionLedger:
     def __init__(self, path: str):
         self.path = path
@@ -78,6 +88,9 @@ class PredictionLedger:
                  skill: Optional[str] = None) -> dict:
         if pid in self._index():
             raise LedgerError(f"Dự đoán {pid} đã tồn tại.")
+        if skill and not resolve_by:
+            raise LedgerError("Dự đoán gắn tên kỹ năng phải có hạn resolve_by — "
+                              "không có hạn thì thất bại có thể nằm im mãi không chấm.")
         binary = probability is not None
         ranged = low is not None and high is not None
         if binary == ranged:
@@ -111,6 +124,22 @@ class PredictionLedger:
         late = bool(p.get("resolve_by")) and now[:10] > str(p["resolve_by"])[:10]
         return self._append({"type": "RESOLUTION", "prediction_id": pid, "outcome": outcome,
                              "source": source, "resolved_at": now, "late": late})
+
+    def overdue(self, ids: List[str], today: Optional[str] = None) -> Score:
+        """Dự đoán quá hạn resolve_by mà CHƯA chấm = trượt tối đa (không được im để giấu thất bại)."""
+        today = (today or now_iso())[:10]
+        entries = self.entries()
+        resolved = {e["prediction_id"] for e in entries if e["type"] == "RESOLUTION"}
+        bn = rn = 0
+        for e in entries:
+            if (e["type"] == "PREDICTION" and e["id"] in ids and e["id"] not in resolved
+                    and e.get("resolve_by") and str(e["resolve_by"])[:10] < today):
+                if e["probability"] is not None:
+                    bn += 1
+                else:
+                    rn += 1
+        return Score(resolved=bn + rn, binary_n=bn, brier=1.0 if bn else None,
+                     range_n=rn, range_hit_rate=0.0 if rn else None)
 
     def score(self, domain: Optional[str] = None, provider: Optional[str] = None,
               ids: Optional[List[str]] = None,

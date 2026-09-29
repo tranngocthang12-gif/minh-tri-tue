@@ -21,7 +21,7 @@ from .canon import now_iso
 from .chain import HashChain
 from .epistemics import Claim
 from .gates import GatePolicy, skill_gate
-from .ledger import PredictionLedger, Score
+from .ledger import PredictionLedger, Score, merge_scores
 from .seats import Critique, Proposal, adjudicate
 
 
@@ -54,6 +54,7 @@ class LessonBook:
                 sk["status_ledger_seq"] = e.get("ledger_seq", -1)
                 if e["status"] == "PROMOTED":
                     sk["promoted_at"] = e["seq"]
+                    sk["promoted_ledger_seq"] = e.get("ledger_seq", -1)
                 sk["history"].append({k: e[k] for k in ("status", "version", "reasons", "at")})
             elif t == "VERSION_REJECTED":      # chỉ gắn lên phiên bản mới
                 sk = skills[e["skill"]]
@@ -143,10 +144,16 @@ class LessonBook:
                             late_is_miss=True)
 
     def _watch_score(self, skill: str, v: dict, ledger: PredictionLedger,
-                     policy: GatePolicy) -> Score:
-        """Chấm để GIÁM SÁT: dự đoán gốc + dự đoán cùng miền gắn tên kỹ năng."""
-        ids = sorted(set(v["prediction_ids"]) | set(self._tagged(skill, v["domain"], ledger)))
-        return ledger.score(ids=ids, max_rel_width=policy.max_rel_width, late_is_miss=True)
+                     policy: GatePolicy, since_seq: int = -1) -> Score:
+        """Chấm để GIÁM SÁT: dự đoán gốc (mọi thời điểm)
+        + dự đoán cùng miền gắn tên có kết quả SAU mốc nâng gần nhất (since_seq)
+        + dự đoán gắn tên QUÁ HẠN mà chưa chấm (tính trượt).
+        Dự đoán gắn tên cũ trước mốc nâng không được dùng để pha loãng thất bại mới."""
+        tagged = self._tagged(skill, v["domain"], ledger)
+        base = self._base_score(v, ledger, policy)
+        fresh = ledger.score(ids=tagged, max_rel_width=policy.max_rel_width,
+                             late_is_miss=True, after_seq=since_seq)
+        return merge_scores(base, fresh, ledger.overdue(tagged))
 
     @staticmethod
     def _watch_failures(score: Score, policy: GatePolicy) -> List[str]:
@@ -172,6 +179,10 @@ class LessonBook:
         decision = self._three_seats(v, proposal, critique, adjudicator_session)
         score = self._base_score(v, ledger, policy)
         gate = skill_gate(score, decision, policy)
+        watch = self._watch_failures(
+            self._watch_score(skill, v, ledger, policy, sk.get("promoted_ledger_seq", -1)), policy)
+        if watch:
+            gate = type(gate)(passed=False, reasons=gate.reasons * (not gate.passed) + watch)
         base = {"skill": skill, "version": v["version"], "reasons": gate.reasons,
                 "score": score.to_dict(), "decision": decision.to_dict(),
                 "sessions": [proposal.session, critique.session, adjudicator_session],
@@ -187,7 +198,7 @@ class LessonBook:
         if sk["status"] != "PROMOTED":
             return None
         v = self._version(sk, sk["active_version"])
-        score = self._watch_score(skill, v, ledger, policy)
+        score = self._watch_score(skill, v, ledger, policy, sk.get("promoted_ledger_seq", -1))
         reasons = self._watch_failures(score, policy)
         status = "SUSPENDED" if reasons else None
         if not reasons:
@@ -196,10 +207,10 @@ class LessonBook:
             preds = {e["id"]: e for e in ledger.entries() if e["type"] == "PREDICTION"}
             new_domain = [e for e in ledger.entries() if e["type"] == "RESOLUTION"
                           and e["seq"] > since and preds[e["prediction_id"]]["domain"] == v["domain"]]
-            fresh = [e for e in new_domain if e["prediction_id"] in tagged]
-            if len(new_domain) >= policy.stale_after and not fresh:
+            window = new_domain[-policy.stale_after:]          # cửa sổ TRƯỢT: N kết quả gần nhất
+            if len(window) >= policy.stale_after and not any(e["prediction_id"] in tagged for e in window):
                 status = "STALE"
-                reasons = [f"{len(new_domain)} kết quả mới trong miền {v['domain']} nhưng không có "
+                reasons = [f"{policy.stale_after} kết quả gần nhất trong miền {v['domain']} không có "
                            "kết quả nào gắn tên kỹ năng — im lặng không phải bằng chứng còn đúng."]
         if not status:
             return None
@@ -224,7 +235,8 @@ class LessonBook:
         decision = adjudicate(proposal, critique, adjudicator_session)  # ba phiên mới, độc lập
         score = self._base_score(v, ledger, policy)
         gate = skill_gate(score, decision, policy)
-        watch = self._watch_failures(self._watch_score(skill, v, ledger, policy), policy)
+        watch = self._watch_failures(
+            self._watch_score(skill, v, ledger, policy, sk.get("promoted_ledger_seq", -1)), policy)
         if not gate.passed or watch:
             raise BookError("Rollback bị từ chối — bản cũ rớt cổng/giám sát trên dữ liệu hiện có: "
                             + "; ".join((gate.reasons if not gate.passed else []) + watch))

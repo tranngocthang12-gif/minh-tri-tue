@@ -5,6 +5,8 @@ import sys
 import tempfile
 import unittest
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from minhtri import bench
 from minhtri.chain import ChainError, HashChain
 from minhtri.epistemics import Claim, ClaimKind, EvidenceGrade
@@ -14,6 +16,7 @@ from minhtri.lessons import BookError, LessonBook
 from minhtri.providers import ProviderError, ProviderRegistry, canonical
 from minhtri.seats import Critique, Objection, Proposal, SeatError, Severity
 
+FAR = "2099-12-31"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -104,7 +107,7 @@ class TestPredictionScope(Base):
 class TestRecheckAndRollback(Base):
     def fail_tagged(self, n=8):
         for i in range(n):
-            self.led.register(f"t{i}", "yt", "q", "claude", probability=0.9, skill="hook")
+            self.led.register(f"t{i}", "yt", "q", "claude", probability=0.9, skill="hook", resolve_by=FAR)
             self.led.resolve(f"t{i}", False, "yt-analytics")
 
     def test_new_tagged_evidence_suspends(self):                     # Grok #7
@@ -242,9 +245,6 @@ class TestLevels(unittest.TestCase):                                  # Grok #13
                          Level.L3_PREDICTION)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class TestRound2(Base):
     """Phản biện Grok vòng 2: N1–N5 và ý 3, 8."""
@@ -255,7 +255,7 @@ class TestRound2(Base):
         led.resolve("m0", False, "x")                                  # bài học yếu: 1 dự đoán sai
         book.add_lesson("Lw", "yt", claim(), ["m0"], led, "claude", "s1")
         for i in range(6):                                             # dự đoán dễ, gắn tên
-            led.register(f"e{i}", "yt", "q", "claude", probability=0.99, skill="weak")
+            led.register(f"e{i}", "yt", "q", "claude", probability=0.99, skill="weak", resolve_by=FAR)
             led.resolve(f"e{i}", True, "x")
         book.propose_skill("weak", ["Lw"], "q", ["m0"], "claude", "s1")
         p, c = seats()
@@ -274,7 +274,7 @@ class TestRound2(Base):
         p, c = seats("s7", "s8")
         with self.assertRaises(BookError):                             # thoát STALE cần bằng chứng mới
             self.book.rollback("hook", 1, self.led, p, c, "s9", "vẫn tốt")
-        self.led.register("f1", "yt", "q", "claude", probability=0.9, skill="hook")
+        self.led.register("f1", "yt", "q", "claude", probability=0.9, skill="hook", resolve_by=FAR)
         self.led.resolve("f1", True, "x")
         self.assertEqual(self.book.rollback("hook", 1, self.led, p, c, "s9", "có kết quả mới")["status"],
                          "PROMOTED")
@@ -317,3 +317,48 @@ class TestAppendOnlyBase(unittest.TestCase):                           # N4
         r = subprocess.run([sys.executable, os.path.join(ROOT, "tools/check_append_only.py"), "0" * 40],
                            cwd=d, capture_output=True, text=True)
         self.assertEqual(r.returncode, 1, r.stdout)
+
+
+class TestRound3(Base):
+    """Phản biện Grok vòng 3: M1–M3, N2 đúng spec, dự đoán gắn tên quá hạn."""
+
+    def tag(self, pid, p, outcome, resolve_by=FAR):
+        self.led.register(pid, "yt", "q", "claude", probability=p, skill="hook", resolve_by=resolve_by)
+        if outcome is not None:
+            self.led.resolve(pid, outcome, "yt-analytics")
+
+    def test_old_tags_cannot_dilute_new_failures(self):             # M1
+        for i in range(30):                                         # điểm đẹp TRƯỚC khi nâng
+            self.tag(f"pre{i}", 0.99, True)
+        self.promote_v1()
+        for i in range(4):                                          # thất bại SAU khi nâng
+            self.tag(f"post{i}", 0.95, False)
+        self.assertEqual(self.book.recheck("hook", self.led)["status"], "SUSPENDED")
+
+    def test_one_checkin_then_silence_goes_stale(self):              # M2 / N2
+        self.promote_v1()
+        self.tag("once", 0.9, True)
+        for i in range(20):
+            self.led.register(f"o{i}", "yt", "q", "claude", probability=0.6)
+            self.led.resolve(f"o{i}", True, "x")
+        self.assertEqual(self.book.recheck("hook", self.led)["status"], "STALE")
+
+    def test_overdue_unresolved_tag_counts_as_miss(self):
+        self.promote_v1()
+        for i in range(4):
+            self.tag(f"od{i}", 0.9, None, resolve_by="2000-01-01")  # quá hạn, không ai chấm
+        self.assertEqual(self.book.recheck("hook", self.led)["status"], "SUSPENDED")
+
+    def test_tagged_failures_block_promotion(self):                  # M3
+        for i in range(8):
+            self.tag(f"bad{i}", 0.95, False)
+        r = self.promote_v1()
+        self.assertEqual(r["type"], "VERSION_REJECTED")
+
+    def test_tag_requires_deadline(self):
+        with self.assertRaises(LedgerError):
+            self.led.register("nd", "yt", "q", "claude", probability=0.5, skill="hook")
+
+
+if __name__ == "__main__":
+    unittest.main()

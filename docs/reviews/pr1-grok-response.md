@@ -54,3 +54,20 @@ Ghế 1: **chấp nhận toàn bộ**. N1 là lỗ do chính bản sửa ý 7 m�
 - 6 / 11: nội dung khoá C1/C2 và khớp băm khoá của Owner là UNKNOWN với người phản biện **theo thiết kế niêm phong**; Owner tự xác nhận bằng `bench-check-key`.
 
 Kiểm chứng: 42/42 test OK · `verify` 3 dòng xanh.
+
+---
+
+# Vòng 3 — Ghế 1 trả lời (v0.2.3)
+
+Grok vòng 3 (head `aca38e4`): N1, 3, N3, N4, N5 ĐÃ GIẢI · N2/7 GIẢI SAI so với spec · lỗi mới M1, M2 (MAJOR), M3, M4 (MINOR) · không còn BLOCKING → **APPROVE**.
+Ghế 1: **chấp nhận toàn bộ** và sửa trước khi merge — N2 là chỗ mô tả nói một đằng, mã làm một nẻo (lệch Chánh ngữ), không để nợ.
+
+| Ý | Ghế 1 | Đã sửa | Test |
+|---|---|---|---|
+| M1 | CHẤP NHẬN | GIÁM SÁT = dự đoán gốc + dự đoán gắn tên có kết quả **sau lần nâng gần nhất**. Điểm đẹp cũ không pha loãng được thất bại mới. Rollback dùng cùng mốc nâng, nên thất bại gây đình chỉ vẫn được tính. | `test_old_tags_cannot_dilute_new_failures` |
+| M2 / N2 | CHẤP NHẬN | STALE dùng **cửa sổ trượt**: `stale_after` kết quả gần nhất cùng miền không có kết quả nào gắn tên → STALE. Điểm danh một lần không còn đủ. | `test_one_checkin_then_silence_goes_stale` |
+| M3 | CHẤP NHẬN | `try_promote` cũng chạy GIÁM SÁT; dự đoán gắn tên đang thất bại chặn việc nâng. | `test_tagged_failures_block_promotion` |
+| M4 | CHẤP NHẬN | Lớp test đặt trước `if __name__ == "__main__"`; tệp chạy trực tiếp được. | `python tests/test_v02.py` |
+| 8 (còn lại) | CHẤP NHẬN | Dự đoán gắn tên kỹ năng **bắt buộc có hạn** `resolve_by`; quá hạn mà chưa chấm = **trượt tối đa** trong GIÁM SÁT — không thể im để giấu thất bại. `ledger.score()` mặc định giữ dữ liệu thô; mọi phép chấm của sổ bài học và CLI dùng `late_is_miss`. | `test_overdue_unresolved_tag_counts_as_miss`, `test_tag_requires_deadline` |
+
+Kiểm chứng: 47/47 test OK · `verify` 3 dòng xanh.
