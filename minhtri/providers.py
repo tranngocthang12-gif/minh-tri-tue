@@ -27,8 +27,7 @@ class ProviderError(ValueError):
 def canonical(name: str) -> str:
     n = name.strip().lower()
     for canon, prefixes in _ALIASES.items():
-        if any(n == p or n.startswith(p + "-") or n.startswith(p + " ") or n.startswith(p)
-               for p in prefixes):
+        if any(n == p or n.startswith(p + "-") or n.startswith(p + " ") for p in prefixes):
             return canon
     raise ProviderError(f"Provider lạ '{name}'. Chỉ nhận: {', '.join(CANONICAL)}.")
 

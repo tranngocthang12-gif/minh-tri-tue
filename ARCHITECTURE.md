@@ -24,7 +24,8 @@ gates.py ── cổng nâng BÀI HỌC → KỸ NĂNG; xếp cấp L0–L9 theo
    ▼
 lessons.py ── SỔ BÀI HỌC & KỸ NĂNG (chuỗi băm): bài học trỏ về dự đoán đã chấm, cùng miền;
    │            kỹ năng chỉ dùng dự đoán của chính bài học; trọng tài ba ghế gọi TRONG hàm;
-   │            bản mới rớt không kéo đổ bản active; recheck gồm dự đoán mới gắn tên kỹ năng;
+   │            bản mới rớt không kéo đổ bản active; NÂNG chỉ chấm dự đoán gốc (không chọn lọc);
+   │            GIÁM SÁT thêm dự đoán gắn tên → SUSPENDED; im lặng quá lâu → STALE; chấm trễ = trượt;
    │            rollback phải qua cổng + ba ghế lại. KỸ NĂNG ≠ CẤP HỌC.
    │
    ▼

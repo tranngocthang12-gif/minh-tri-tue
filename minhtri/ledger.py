@@ -114,9 +114,12 @@ class PredictionLedger:
 
     def score(self, domain: Optional[str] = None, provider: Optional[str] = None,
               ids: Optional[List[str]] = None,
-              max_rel_width: Optional[float] = None) -> Score:
+              max_rel_width: Optional[float] = None, late_is_miss: bool = False,
+              after_seq: Optional[int] = None) -> Score:
         """max_rel_width: khoảng rộng hơn (high-low)/max(|giữa|,1) bị tính là TRƯỢT —
-        chặn việc đoán khoảng vô tận để 'trúng' 100%."""
+        chặn việc đoán khoảng vô tận để 'trúng' 100%.
+        late_is_miss: kết quả chấm sau resolve_by tính là trượt tối đa.
+        after_seq: chỉ tính các RESOLUTION ghi sau số thứ tự này."""
         entries = self.entries()
         preds = {e["id"]: e for e in entries if e["type"] == "PREDICTION"}
         bs, hits = [], []
@@ -124,11 +127,20 @@ class PredictionLedger:
             if e["type"] != "RESOLUTION":
                 continue
             p = preds[e["prediction_id"]]
+            if after_seq is not None and e["seq"] <= after_seq:
+                continue
             if ids is not None and p["id"] not in ids:
                 continue
             if domain and p["domain"] != domain:
                 continue
             if provider and p["provider"] != provider:
+                continue
+            if late_is_miss and e.get("late"):
+                # chấm trễ hạn = TRƯỢT tối đa, không được dùng để né thất bại
+                if p["probability"] is not None:
+                    bs.append(1.0)
+                else:
+                    hits.append(0.0)
                 continue
             if p["probability"] is not None:
                 bs.append((p["probability"] - (1.0 if e["outcome"] else 0.0)) ** 2)

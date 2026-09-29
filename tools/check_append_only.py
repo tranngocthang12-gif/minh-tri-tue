@@ -31,9 +31,26 @@ def main(ref: str) -> int:
     return 1 if bad else 0
 
 
+def resolve_base(ref: str):
+    """Commit gốc để so. Push nhánh mới (before toàn số 0) → so với merge-base của main."""
+    if ref and set(ref) != {"0"}:
+        return ref
+    for main in ("origin/main", "main"):
+        r = subprocess.run(["git", "merge-base", "HEAD", main], capture_output=True, text=True)
+        if r.returncode == 0 and r.stdout.strip():
+            base = r.stdout.strip()
+            head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+            if base != head:
+                return base
+            parent = subprocess.run(["git", "rev-parse", "HEAD~1"], capture_output=True, text=True)
+            return parent.stdout.strip() if parent.returncode == 0 else None
+    return None
+
+
 if __name__ == "__main__":
-    ref = sys.argv[1] if len(sys.argv) > 1 else ""
-    if not ref or set(ref) == {"0"}:
-        print("Không có commit gốc để so — bỏ qua.")
+    base = resolve_base(sys.argv[1] if len(sys.argv) > 1 else "")
+    if not base:
+        print("Không có commit gốc để so (commit đầu tiên của repo) — bỏ qua.")
         sys.exit(0)
-    sys.exit(main(ref))
+    print(f"So với commit gốc {base[:12]}")
+    sys.exit(main(base))

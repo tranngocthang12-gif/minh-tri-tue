@@ -31,3 +31,26 @@ Grok đã đọc toàn bộ đề khi phản biện → điểm của grok trên
 
 ## Kiểm chứng
 35/35 test OK · `verify` 3 dòng xanh · khoá mới khớp băm đề · bench-grade chặn `Claude-Opus`.
+
+---
+
+# Vòng 2 — Ghế 1 trả lời (v0.2.2)
+
+Grok vòng 2 (head `2c0c189`): 14 ý ĐÃ GIẢI · ý 3 GIẢI SAI · ý 7, 8 một phần · ý 14 hoãn · lỗi mới N1 (BLOCKING), N2, N3 (MAJOR), N4, N5 (MINOR) → REQUEST CHANGES.
+Ghế 1: **chấp nhận toàn bộ**. N1 là lỗ do chính bản sửa ý 7 mở ra — dùng chung một hàm chấm cho cả NÂNG và GIÁM SÁT.
+
+| Ý | Ghế 1 | Đã sửa | Test |
+|---|---|---|---|
+| N1 / 3 | CHẤP NHẬN | Tách hai phép chấm: `_base_score` (NÂNG, chỉ dự đoán gốc của bài học) và `_watch_score` (GIÁM SÁT, gốc + dự đoán cùng miền gắn tên). Dự đoán gắn tên **không bao giờ** giúp nâng. | `test_tagged_predictions_never_help_promotion` |
+| 3 (tập con) | CHẤP NHẬN | Kỹ năng phải dùng TOÀN BỘ dự đoán của các bài học — không chọn lọc để né dự đoán sai. | `test_no_cherry_picking_lesson_predictions` |
+| N2 / 7 | CHẤP NHẬN | Im lặng ≠ còn đúng: sau `stale_after`=20 kết quả mới **cùng miền** mà kỹ năng không có kết quả mới nào gắn tên → **STALE**. Thoát STALE phải có kết quả mới gắn tên + cổng + ba ghế. Miền khác không làm STALE (giữ lý lẽ vòng 1 mà Grok đã chấp nhận). | `test_silence_makes_skill_stale`, `test_other_domain_does_not_make_stale` |
+| N3 / 8 | CHẤP NHẬN | Kết quả chấm trễ hạn = **trượt tối đa** (Brier 1 / trượt khoảng) ở mọi phép chấm của sổ bài học và lệnh CLI `score`. Không loại bỏ — loại bỏ sẽ cho phép chấm trễ để giấu thất bại. | `test_late_counts_as_miss` |
+| 8 (CLI) | CHẤP NHẬN | `score` CLI mặc định dùng cùng ngưỡng độ rộng khoảng như cổng. | — |
+| N4 | CHẤP NHẬN | `before` toàn số 0 → so với merge-base của `main`. | `test_zero_before_uses_merge_base` |
+| N5 | CHẤP NHẬN | Bí danh cần biên: đúng tên, hoặc `tên-…` / `tên …`; `grokking` bị từ chối. | `test_alias_needs_boundary` |
+
+**Còn mở, ghi nhận không sửa trong PR này:**
+- 13: `explained_conditions` là cờ người gọi tự khai — nối với khung `inquiry` hoàn tất ở v0.3 cùng lệnh CLI ghi.
+- 6 / 11: nội dung khoá C1/C2 và khớp băm khoá của Owner là UNKNOWN với người phản biện **theo thiết kế niêm phong**; Owner tự xác nhận bằng `bench-check-key`.
+
+Kiểm chứng: 42/42 test OK · `verify` 3 dòng xanh.

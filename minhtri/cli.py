@@ -7,6 +7,7 @@ import sys
 from . import brain
 from . import bench
 from .domains import create_domain
+from .gates import GatePolicy
 from .lessons import LessonBook
 from .ledger import PredictionLedger
 from .providers import ProviderRegistry
@@ -25,6 +26,8 @@ def main(argv=None) -> int:
     p.add_argument("--high", type=float); p.add_argument("--by")
     r = sub.add_parser("resolve"); r.add_argument("id"); r.add_argument("outcome"); r.add_argument("source")
     s = sub.add_parser("score"); s.add_argument("--domain"); s.add_argument("--provider")
+    s.add_argument("--max-rel-width", type=float, default=GatePolicy().max_rel_width,
+                   help="khoảng rộng hơn tính là trượt (mặc định theo cổng kỹ năng)")
     c = sub.add_parser("champion"); c.add_argument("task")
     sub.add_parser("skills")
     be = sub.add_parser("bench-export"); be.add_argument("suite")
@@ -62,7 +65,8 @@ def main(argv=None) -> int:
         e = led.resolve(a.id, outcome, a.source)
         print("Đã chấm:", e["prediction_id"], e["hash"][:12])
     elif a.cmd == "score":
-        print(json.dumps(led.score(a.domain, a.provider).to_dict(), ensure_ascii=False, indent=2))
+        sc = led.score(a.domain, a.provider, max_rel_width=a.max_rel_width, late_is_miss=True)
+        print(json.dumps(sc.to_dict(), ensure_ascii=False, indent=2))
     elif a.cmd == "champion":
         reg = ProviderRegistry(brain.PROVIDERS)
         res = reg.elect(a.task); reg.save()

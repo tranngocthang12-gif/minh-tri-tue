@@ -31,6 +31,8 @@ class GatePolicy:
     max_brier: float = 0.20          # 0.25 = đoán mò 50/50
     min_range_hit_rate: float = 0.60
     max_rel_width: float = 1.0       # khoảng rộng hơn thế tính là trượt
+    stale_after: int = 20            # sau ngần ấy kết quả mới CÙNG MIỀN mà kỹ năng không có
+                                     # kết quả mới nào gắn tên → STALE (im lặng ≠ còn đúng)
 
 
 @dataclass

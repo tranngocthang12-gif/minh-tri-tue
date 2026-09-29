@@ -244,3 +244,76 @@ class TestLevels(unittest.TestCase):                                  # Grok #13
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestRound2(Base):
+    """Phản biện Grok vòng 2: N1–N5 và ý 3, 8."""
+
+    def test_tagged_predictions_never_help_promotion(self):           # N1 / ý 3
+        led, book = self.led, self.book
+        led.register("m0", "yt", "q", "claude", probability=0.9)
+        led.resolve("m0", False, "x")                                  # bài học yếu: 1 dự đoán sai
+        book.add_lesson("Lw", "yt", claim(), ["m0"], led, "claude", "s1")
+        for i in range(6):                                             # dự đoán dễ, gắn tên
+            led.register(f"e{i}", "yt", "q", "claude", probability=0.99, skill="weak")
+            led.resolve(f"e{i}", True, "x")
+        book.propose_skill("weak", ["Lw"], "q", ["m0"], "claude", "s1")
+        p, c = seats()
+        self.assertEqual(book.try_promote("weak", led, p, c, "s3")["type"], "VERSION_REJECTED")
+
+    def test_no_cherry_picking_lesson_predictions(self):              # ý 3 (tập con)
+        with self.assertRaises(BookError):
+            self.book.propose_skill("s", ["L1"], "q", self.ids[:3], "claude", "s1")
+
+    def test_silence_makes_skill_stale(self):                          # N2
+        self.promote_v1()
+        for i in range(20):                                            # miền vẫn chạy, kỹ năng im
+            self.led.register(f"o{i}", "yt", "q", "claude", probability=0.6)
+            self.led.resolve(f"o{i}", True, "x")
+        self.assertEqual(self.book.recheck("hook", self.led)["status"], "STALE")
+        p, c = seats("s7", "s8")
+        with self.assertRaises(BookError):                             # thoát STALE cần bằng chứng mới
+            self.book.rollback("hook", 1, self.led, p, c, "s9", "vẫn tốt")
+        self.led.register("f1", "yt", "q", "claude", probability=0.9, skill="hook")
+        self.led.resolve("f1", True, "x")
+        self.assertEqual(self.book.rollback("hook", 1, self.led, p, c, "s9", "có kết quả mới")["status"],
+                         "PROMOTED")
+
+    def test_other_domain_does_not_make_stale(self):
+        self.promote_v1()
+        for i in range(25):
+            self.led.register(f"x{i}", "finance", "q", "claude", probability=0.6)
+            self.led.resolve(f"x{i}", True, "x")
+        self.assertIsNone(self.book.recheck("hook", self.led))
+
+    def test_late_counts_as_miss(self):                                # N3 / ý 8
+        led = PredictionLedger(tmp("l.jsonl"))
+        led.register("a", "d", "q", "c", probability=0.9, resolve_by="2000-01-01")
+        led.resolve("a", True, "x")
+        self.assertAlmostEqual(led.score().brier, 0.01)
+        self.assertEqual(led.score(late_is_miss=True).brier, 1.0)
+
+    def test_alias_needs_boundary(self):                               # N5
+        with self.assertRaises(ProviderError):
+            canonical("grokking")
+        self.assertEqual(canonical("grok-4"), "grok")
+
+
+class TestAppendOnlyBase(unittest.TestCase):                           # N4
+    def test_zero_before_uses_merge_base(self):
+        d = tempfile.mkdtemp()
+        run = lambda *a: subprocess.run(a, cwd=d, check=True, capture_output=True)
+        git = ["git", "-c", "user.email=a@b", "-c", "user.name=t"]
+        run("git", "init", "-q", "-b", "main")
+        os.makedirs(os.path.join(d, "brain/ledger")); os.makedirs(os.path.join(d, "brain/lessons"))
+        book = os.path.join(d, "brain/ledger/predictions.jsonl")
+        open(os.path.join(d, "brain/lessons/book.jsonl"), "w").close()
+        PredictionLedger(book).register("a", "d", "q", "c", probability=0.9)
+        run("git", "add", "-A"); run(*git, "commit", "-qm", "base")
+        run("git", "checkout", "-qb", "feature")
+        os.remove(book)
+        PredictionLedger(book).register("a", "d", "q", "c", probability=0.1)
+        run("git", "add", "-A"); run(*git, "commit", "-qm", "rewrite")
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "tools/check_append_only.py"), "0" * 40],
+                           cwd=d, capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1, r.stdout)
