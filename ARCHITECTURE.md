@@ -1,5 +1,15 @@
-# KIẾN TRÚC TẦNG 1 — v0.2
+# KIẾN TRÚC TẦNG 1 — v0.2.4
 
+## Tầng quản trị (bao ngoài mọi thứ)
+```
+LUAT_KIEN_TRUC_TOI_CAO.md ── khoá băm brain/law.lock; sửa chỉ qua ADR OWNER-APPROVED (CI chặn)
+BAN_GIAO.md ──────────────── mở phiên (đọc luật, handover, xác minh remote) · đóng phiên (sổ bàn giao)
+minhtri/handover.py ──────── sổ bàn giao chỉ ghi thêm brain/handover/log.jsonl
+AGENTS.md · CLAUDE.md · GEMINI.md ── cửa vào của từng công cụ AI, trỏ về BAN_GIAO.md
+docs/NO_VI_HIEN.md ───────── vi phạm đã biết, chưa sửa — không được tuyên bố đã đạt
+```
+
+## Lõi học
 ```
 OWNER PURPOSE
    │
@@ -52,6 +62,8 @@ tools/check_append_only.py ── CI so sổ với commit gốc: dòng cũ phả
 | `ledger/predictions.jsonl` | sổ dự đoán + kết quả, chuỗi băm |
 | `domains/<miền>/domain.json` | tri thức Tầng 2 của từng miền |
 | `lessons/book.jsonl` | sổ bài học & kỹ năng, chuỗi băm |
+| `handover/log.jsonl` | sổ bàn giao giữa các phiên, chuỗi băm |
+| `law.lock` | khoá băm Luật Kiến trúc Tối cao đang hiệu lực |
 | `../benchmarks/*.json` | đề thi AI (không chứa đáp án) |
 
 Dữ liệu thô lớn (video, audio, hàng triệu event) **không** vào GitHub — chỉ giữ tóm tắt, checksum, đường dẫn.
@@ -59,6 +71,7 @@ Dữ liệu thô lớn (video, audio, hàng triệu event) **không** vào GitHu
 ## Lộ trình
 - **v0.1:** luật lõi chạy offline + kiểm thử + cửa đóng góp 4 AI.
 - **v0.2 (hiện tại):** sổ bài học & kỹ năng có phiên bản, đình chỉ, rollback; benchmark niêm phong `tang1-core-v1` (đề THỬ, chưa đủ bầu champion). Sửa theo phản biện Grok PR #1.
-- **v0.3:** lệnh CLI ghi bài học/kỹ năng (bắt 3 mã phiên); đề benchmark do AI khác soạn.
+- **v0.2.4:** Luật Kiến trúc Tối cao + Luật Bàn giao + CI thực thi (ADR 0001).
+- **v0.3:** sửa vi phạm V1–V3 (BLOCKING) trong `docs/NO_VI_HIEN.md`; lệnh CLI ghi bài học/kỹ năng (bắt 3 mã phiên); đề benchmark do AI khác soạn.
 - **v0.4:** L7 meta-learning (đo phương pháp học nào cho dự đoán tốt hơn); L8 self-repair qua PR sandbox + rollback.
 - **v0.4:** Owner giao miền đầu tiên → chạy vòng thật đầu tiên.

@@ -8,6 +8,7 @@ from . import brain
 from . import bench
 from .domains import create_domain
 from .gates import GatePolicy
+from .handover import HandoverLog, check_law
 from .lessons import LessonBook
 from .ledger import PredictionLedger
 from .providers import ProviderRegistry
@@ -30,6 +31,8 @@ def main(argv=None) -> int:
                    help="khoảng rộng hơn tính là trượt (mặc định theo cổng kỹ năng)")
     c = sub.add_parser("champion"); c.add_argument("task")
     sub.add_parser("skills")
+    sub.add_parser("handover")
+    ha = sub.add_parser("handover-add"); ha.add_argument("entry")
     be = sub.add_parser("bench-export"); be.add_argument("suite")
     bg = sub.add_parser("bench-grade")
     for x in ("suite", "key", "answers", "provider", "session"):
@@ -53,6 +56,8 @@ def main(argv=None) -> int:
                 if bench.leaks(sui):
                     raise bench.BenchError(f"{f}: có trường mang đáp án: {bench.leaks(sui)}")
         print("Đề benchmark: không lộ đáp án.")
+        check_law(brain.ROOT); print("Luật Kiến trúc Tối cao: khớp khoá băm.")
+        HandoverLog(brain.HANDOVER).verify(); print("Sổ bàn giao: chuỗi băm nguyên vẹn.")
     elif a.cmd == "domain":
         print("Đã mở miền:", create_domain(brain.DOMAINS, a.name, a.purpose))
     elif a.cmd == "predict":
@@ -85,6 +90,21 @@ def main(argv=None) -> int:
         bench.record(reg, a.provider, suite["id"], scores); reg.save()
         print(json.dumps({"provider": a.provider, "suite": suite["id"], "scores": scores},
                          ensure_ascii=False, indent=2))
+    elif a.cmd == "handover":
+        lock = check_law(brain.ROOT)
+        log = HandoverLog(brain.HANDOVER); log.verify()
+        last = log.last()
+        print(f"LUẬT: khớp khoá · phiên bản {lock['version']} · băm {lock['sha256'][:8]} · {lock['adr']}")
+        print("BÀN GIAO CUỐI:" if last else "BÀN GIAO CUỐI: (chưa có)")
+        if last:
+            print(json.dumps({k: v for k, v in last.items() if k not in ("hash", "prev_hash")},
+                             ensure_ascii=False, indent=2))
+        print("→ Làm tiếp BAN_GIAO.md phần A (xác minh remote, tuyên bố MỞ PHIÊN).")
+    elif a.cmd == "handover-add":
+        lock = check_law(brain.ROOT)
+        with open(a.entry, encoding="utf-8") as f:
+            e = HandoverLog(brain.HANDOVER).add(json.load(f), lock["sha256"])
+        print("Đã ghi bàn giao:", e["session"], e["hash"][:12])
     elif a.cmd == "bench-check-key":
         bench.check_key(bench.load(a.suite), bench.load(a.key))
         print("Đáp án khớp băm niêm phong của đề.")

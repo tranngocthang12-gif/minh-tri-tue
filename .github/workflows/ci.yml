@@ -3,6 +3,8 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -13,4 +15,9 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - run: python -m minhtri.cli verify
       - name: Sổ chỉ ghi thêm (so với commit gốc)
-        run: python tools/check_append_only.py "${{ github.event.pull_request.base.sha || github.event.before }}"
+        run: python tools/check_append_only.py "$BASE"
+      - name: Luật Kiến trúc Tối cao (khoá băm + Chương V)
+        run: python tools/check_law.py "$BASE"
+      - name: Sổ bàn giao (Điều 14)
+        if: github.event_name == 'pull_request'
+        run: python tools/check_handover.py "$BASE"

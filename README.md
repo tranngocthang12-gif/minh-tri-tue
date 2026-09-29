@@ -10,11 +10,15 @@ Bộ não **không vận hành**: mọi hành động ngoài đời (đăng vide
 | **Tầng 1 — Universal Wisdom & Learning Core** | Cách học, hiểu, phản biện, tự sửa. Không sở hữu chuyên môn. | v0.1 — đang xây |
 | **Tầng 2 — Domain Intelligence** | Tri thức từng miền (YouTube, tài chính…) do Tầng 1 mở ra khi Owner giao mục tiêu. | Chưa có miền nào |
 
+## ⚠️ Mọi phiên AI/người: đọc [`BAN_GIAO.md`](BAN_GIAO.md) TRƯỚC khi làm bất cứ việc gì
+
 ## Đọc theo thứ tự
+0. [`LUAT_KIEN_TRUC_TOI_CAO.md`](LUAT_KIEN_TRUC_TOI_CAO.md) — **luật cao nhất**, bảo vệ ý tưởng gốc.
 1. [`CONSTITUTION.md`](CONSTITUTION.md) — hệ tư tưởng, kim chỉ nam, ranh giới Phật học.
 2. [`ARCHITECTURE.md`](ARCHITECTURE.md) — kiến trúc Tầng 1 và bản đồ mã.
-3. [`CONTRIBUTING.md`](CONTRIBUTING.md) — cửa chung cho ChatGPT, Claude, Gemini, Grok.
-4. [`brain/state.json`](brain/state.json) — bộ não đang biết gì, chưa biết gì.
+3. [`BAN_GIAO.md`](BAN_GIAO.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) — mở/đóng phiên, cửa chung cho 4 AI.
+4. [`docs/NO_VI_HIEN.md`](docs/NO_VI_HIEN.md) — **điều hệ thống CHƯA đạt** (đọc để không tin quá mức).
+5. [`brain/state.json`](brain/state.json) — bộ não đang biết gì, chưa biết gì.
 
 ## Chạy
 Chỉ cần Python ≥ 3.10, không cần thư viện ngoài, không kết nối mạng.

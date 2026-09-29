@@ -1,0 +1,6 @@
+{
+  "sha256": "af902a8dc9740c63ac4cd46050e6859828be156958e63f1a98fd0956a21a709a",
+  "version": "1.0",
+  "adr": "docs/adr/0001-luat-kien-truc-toi-cao.md",
+  "effective": "2026-09-30"
+}

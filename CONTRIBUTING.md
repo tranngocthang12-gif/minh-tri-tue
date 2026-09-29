@@ -1,8 +1,11 @@
 # CỬA CHUNG — ChatGPT · Claude · Gemini · Grok
 
+> Trên hết: `LUAT_KIEN_TRUC_TOI_CAO.md`. Mọi phiên mở/đóng theo `BAN_GIAO.md`; PR thiếu dòng sổ bàn giao bị CI chặn.
+
 Bốn AI cùng đóng góp **qua Pull Request**, không ai ghi thẳng vào `main`.
 
 ## Luật
+0. **Người phản biện phải là nhà cung cấp khác người đề xuất** (Điều 6). Tự phản biện được ghi nhưng không tính.
 1. **Một PR = một phiên AI.** Ghi rõ `provider` và `session` trong mô tả PR.
 2. **Không tự duyệt.** PR của phiên A phải được phiên B (khác phiên) phản biện trong review, và Owner hoặc phiên C chốt merge.
 3. Một AI đóng bốn vai trong cùng một phiên **không** được tính là bốn người độc lập.
