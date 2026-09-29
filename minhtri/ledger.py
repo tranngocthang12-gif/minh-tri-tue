@@ -3,6 +3,7 @@
 Mỗi dòng JSONL có prev_hash và hash. Sửa một dòng cũ làm gãy chuỗi.
 """
 import json
+import math
 import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -26,6 +27,16 @@ class Score:
 
     def to_dict(self):
         return self.__dict__.copy()
+
+
+def merge_scores(*scores: "Score") -> "Score":
+    """Gộp nhiều phép chấm (trung bình có trọng số theo số mẫu)."""
+    bn = sum(x.binary_n for x in scores)
+    rn = sum(x.range_n for x in scores)
+    brier = sum((x.brier or 0) * x.binary_n for x in scores) / bn if bn else None
+    hit = sum((x.range_hit_rate or 0) * x.range_n for x in scores) / rn if rn else None
+    return Score(resolved=sum(x.resolved for x in scores), binary_n=bn, brier=brier,
+                 range_n=rn, range_hit_rate=hit)
 
 
 class PredictionLedger:
@@ -73,21 +84,29 @@ class PredictionLedger:
     def register(self, pid: str, domain: str, question: str, provider: str,
                  probability: Optional[float] = None,
                  low: Optional[float] = None, high: Optional[float] = None,
-                 resolve_by: Optional[str] = None, rationale: str = "") -> dict:
+                 resolve_by: Optional[str] = None, rationale: str = "",
+                 skill: Optional[str] = None) -> dict:
         if pid in self._index():
             raise LedgerError(f"Dự đoán {pid} đã tồn tại.")
+        if skill and not resolve_by:
+            raise LedgerError("Dự đoán gắn tên kỹ năng phải có hạn resolve_by — "
+                              "không có hạn thì thất bại có thể nằm im mãi không chấm.")
         binary = probability is not None
         ranged = low is not None and high is not None
         if binary == ranged:
             raise LedgerError("Chọn đúng một dạng: probability (có/không) HOẶC khoảng [low, high].")
         if binary and not 0.0 <= probability <= 1.0:
             raise LedgerError("probability phải trong [0, 1].")
-        if ranged and low > high:
-            raise LedgerError("low > high.")
+        if ranged:
+            if low > high:
+                raise LedgerError("low > high.")
+            if not (math.isfinite(low) and math.isfinite(high)):
+                raise LedgerError("Khoảng dự đoán phải hữu hạn.")
         return self._append({
             "type": "PREDICTION", "id": pid, "domain": domain, "question": question,
             "provider": provider, "probability": probability, "low": low, "high": high,
-            "resolve_by": resolve_by, "rationale": rationale, "registered_at": now_iso(),
+            "resolve_by": resolve_by, "rationale": rationale, "skill": skill,
+            "registered_at": now_iso(),
         })
 
     def resolve(self, pid: str, outcome, source: str) -> dict:
@@ -101,10 +120,35 @@ class PredictionLedger:
         p = idx[pid]
         if p["probability"] is not None and outcome not in (True, False, 0, 1):
             raise LedgerError("Dự đoán có/không cần outcome True/False.")
-        return self._append({"type": "RESOLUTION", "prediction_id": pid,
-                             "outcome": outcome, "source": source, "resolved_at": now_iso()})
+        now = now_iso()
+        late = bool(p.get("resolve_by")) and now[:10] > str(p["resolve_by"])[:10]
+        return self._append({"type": "RESOLUTION", "prediction_id": pid, "outcome": outcome,
+                             "source": source, "resolved_at": now, "late": late})
 
-    def score(self, domain: Optional[str] = None, provider: Optional[str] = None) -> Score:
+    def overdue(self, ids: List[str], today: Optional[str] = None) -> Score:
+        """Dự đoán quá hạn resolve_by mà CHƯA chấm = trượt tối đa (không được im để giấu thất bại)."""
+        today = (today or now_iso())[:10]
+        entries = self.entries()
+        resolved = {e["prediction_id"] for e in entries if e["type"] == "RESOLUTION"}
+        bn = rn = 0
+        for e in entries:
+            if (e["type"] == "PREDICTION" and e["id"] in ids and e["id"] not in resolved
+                    and e.get("resolve_by") and str(e["resolve_by"])[:10] < today):
+                if e["probability"] is not None:
+                    bn += 1
+                else:
+                    rn += 1
+        return Score(resolved=bn + rn, binary_n=bn, brier=1.0 if bn else None,
+                     range_n=rn, range_hit_rate=0.0 if rn else None)
+
+    def score(self, domain: Optional[str] = None, provider: Optional[str] = None,
+              ids: Optional[List[str]] = None,
+              max_rel_width: Optional[float] = None, late_is_miss: bool = False,
+              after_seq: Optional[int] = None) -> Score:
+        """max_rel_width: khoảng rộng hơn (high-low)/max(|giữa|,1) bị tính là TRƯỢT —
+        chặn việc đoán khoảng vô tận để 'trúng' 100%.
+        late_is_miss: kết quả chấm sau resolve_by tính là trượt tối đa.
+        after_seq: chỉ tính các RESOLUTION ghi sau số thứ tự này."""
         entries = self.entries()
         preds = {e["id"]: e for e in entries if e["type"] == "PREDICTION"}
         bs, hits = [], []
@@ -112,14 +156,27 @@ class PredictionLedger:
             if e["type"] != "RESOLUTION":
                 continue
             p = preds[e["prediction_id"]]
+            if after_seq is not None and e["seq"] <= after_seq:
+                continue
+            if ids is not None and p["id"] not in ids:
+                continue
             if domain and p["domain"] != domain:
                 continue
             if provider and p["provider"] != provider:
                 continue
+            if late_is_miss and e.get("late"):
+                # chấm trễ hạn = TRƯỢT tối đa, không được dùng để né thất bại
+                if p["probability"] is not None:
+                    bs.append(1.0)
+                else:
+                    hits.append(0.0)
+                continue
             if p["probability"] is not None:
                 bs.append((p["probability"] - (1.0 if e["outcome"] else 0.0)) ** 2)
             else:
-                hits.append(1.0 if p["low"] <= float(e["outcome"]) <= p["high"] else 0.0)
+                width = (p["high"] - p["low"]) / max(abs((p["high"] + p["low"]) / 2), 1.0)
+                sharp = max_rel_width is None or width <= max_rel_width
+                hits.append(1.0 if sharp and p["low"] <= float(e["outcome"]) <= p["high"] else 0.0)
         return Score(
             resolved=len(bs) + len(hits),
             binary_n=len(bs), brier=(sum(bs) / len(bs)) if bs else None,

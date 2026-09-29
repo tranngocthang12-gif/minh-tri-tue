@@ -20,3 +20,6 @@ Owner mở Issue (giao việc)
   → Trọng tài (Owner hoặc AI phiên s3) quyết: ACCEPT / NEEDS_TEST / REJECT
   → merge khi CI xanh
 ```
+
+## Phản biện có đọc đề benchmark
+Phiên phản biện nào đọc nội dung đề trong `benchmarks/` thì provider đó bị ghi vào `exposed_to` của đề và **không được thi đề đó**. Người phản biện không bao giờ được xem tệp đáp án.

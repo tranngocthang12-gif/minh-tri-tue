@@ -121,15 +121,15 @@ class TestProviders(unittest.TestCase):
         reg = ProviderRegistry(tmp("p.json"), min_samples=2, margin=0.05)
         for n in ("claude", "gpt"):
             reg.add(n, "m")
-        for s in (0.70, 0.72):
-            reg.record("claude", "critique", s, "b1")
+        for i, s in enumerate((0.70, 0.72)):
+            reg.record("claude", "critique", s, f"a{i}")
         self.assertEqual(reg.elect("critique")["champion"], "claude")
-        for s in (0.73, 0.74):
-            reg.record("gpt", "critique", s, "b1")
+        for i, s in enumerate((0.73, 0.74)):
+            reg.record("gpt", "critique", s, f"b{i}")
         self.assertEqual(reg.elect("critique")["champion"], "claude")  # hơn chưa đủ margin
-        for s in (0.95, 0.95):
-            reg.record("gpt", "critique", s, "b2")
-        self.assertEqual(reg.elect("critique")["champion"], "gpt")
+        for i, s in enumerate((0.95, 0.95)):
+            reg.record("gpt", "critique", s, f"c{i}")
+        self.assertEqual(reg.elect("critique")["champion"], "chatgpt")
 
 
 class TestFocusAndDomain(unittest.TestCase):
