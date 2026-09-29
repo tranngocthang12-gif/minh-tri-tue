@@ -1,11 +1,19 @@
 {
   "id": "tang1-core-v1",
-  "version": 1,
+  "version": 2,
+  "status": "TRIAL — chưa đủ để bầu champion",
   "authors": [
     "claude"
   ],
-  "instructions": "Bài thi năng lực lõi Tầng 1: xếp loại phát biểu (research), tìm lỗi lập luận (critique), tính toán (quant). Trả lời ngắn, đúng định dạng: choice là một mã, set là mảng mã, number là một số.",
-  "key_sha256": "437cac1e27e224121c5ec0e47169dc4d5a991331d4a2dbf65ab24b18da7e0467",
+  "author_sessions": [
+    "claude-chat-2026-09-29-v02"
+  ],
+  "exposed_to": [
+    "grok"
+  ],
+  "exposure_note": "grok đã đọc toàn bộ đề khi phản biện PR #1 (grok-review-v02-2026-09-29).",
+  "instructions": "Bài thi năng lực lõi Tầng 1 (đề thử niêm phong, CHƯA đủ để bầu champion). Trả lời đúng định dạng: choice = một mã; set = mảng mã; number = một số.\n\nĐỊNH NGHĨA dùng cho câu E (theo minhtri/epistemics.py của dự án):\n- FACT: điều đã được xác lập bằng bằng chứng từ cấp REPLICATED trở lên (nhiều nguồn độc lập) và có nguồn.\n- OBSERVATION: số liệu/sự việc ghi nhận trực tiếp từ MỘT nguồn đo cụ thể, chưa được xác lập lặp lại.\n- INFERENCE: kết luận rút ra từ quan sát.\n- HYPOTHESIS: phỏng đoán về cơ chế/nguyên nhân, được nêu rõ là cần kiểm chứng, KHÔNG kèm ngưỡng số và hạn thời gian.\n- PREDICTION: khẳng định về một kết quả đo được cụ thể, có ngưỡng và hạn thời gian, chấm được đúng/sai.\n- OPINION: đánh giá theo sở thích/giá trị cá nhân.\n- UNKNOWN: thừa nhận chưa biết, không đưa khẳng định nào.\n\nĐỊNH NGHĨA mã lỗi cho câu C: CORRELATION_AS_CAUSE (lấy tương quan làm nhân quả), SMALL_SAMPLE (mẫu quá ít để kết luận), SURVIVORSHIP (chỉ nhìn kẻ thắng), MEANS_AS_GOAL (lấy phương tiện làm mục tiêu hoặc 'bằng mọi cách'), IRREVERSIBLE_BIG_BET (cược lớn khó đảo ngược khi chưa chắc), NO_KILL_CRITERIA (không có điều kiện dừng), LEAKAGE (dự đoán ghi sau khi đã thấy kết quả), NONE (không có lỗi — chỉ chọn một mình).",
+  "key_sha256": "174019c996f58736edb932cefb1783961af7ef12f9ae4a200b0e80f4072cf072",
   "items": [
     {
       "id": "E1",
@@ -35,7 +43,7 @@
         "OPINION",
         "UNKNOWN"
       ],
-      "prompt": "Xếp loại phát biểu: \"Nếu đổi thumbnail sang ảnh cận mặt, CTR của video B sẽ trên 6% trong 7 ngày tới.\""
+      "prompt": "Xếp loại phát biểu: \"Video B sẽ có CTR trên 6% trong 7 ngày kể từ khi đăng.\""
     },
     {
       "id": "E3",
@@ -50,7 +58,7 @@
         "OPINION",
         "UNKNOWN"
       ],
-      "prompt": "Xếp loại phát biểu: \"Có thể khán giả kênh này thích nhạc chậm hơn nhạc nhanh; cần thử mới biết.\""
+      "prompt": "Xếp loại phát biểu: \"Có thể nhịp chậm là nguyên nhân khán giả kênh này xem lâu hơn; cần thử nghiệm để kiểm chứng.\""
     },
     {
       "id": "E4",
@@ -81,7 +89,7 @@
         "LEAKAGE",
         "NONE"
       ],
-      "prompt": "Tìm TẤT CẢ lỗi trong đề xuất: \"5 kênh đứng top đều đăng video mỗi ngày, vậy đăng mỗi ngày là nguyên nhân giúp kênh lên top. Đề xuất: vay 200 triệu thuê đội sản xuất để đăng mỗi ngày liên tục 12 tháng.\""
+      "prompt": "Tìm các lỗi trong đề xuất: \"5 kênh đứng top đều đăng video mỗi ngày, vậy đăng mỗi ngày là nguyên nhân giúp kênh lên top. Đề xuất: vay 200 triệu thuê đội sản xuất để đăng mỗi ngày liên tục 12 tháng.\""
     },
     {
       "id": "C2",
@@ -97,7 +105,7 @@
         "LEAKAGE",
         "NONE"
       ],
-      "prompt": "Tìm TẤT CẢ lỗi trong báo cáo: \"Sau khi xem kết quả tuần trước, chúng tôi ghi dự đoán rằng thumbnail màu đỏ sẽ thắng — và nó đã thắng 3/3 lần. Mục tiêu quý: đạt 100.000 subscriber bằng mọi cách.\""
+      "prompt": "Tìm các lỗi trong báo cáo: \"Sau khi xem kết quả tuần trước, chúng tôi ghi dự đoán rằng thumbnail màu đỏ sẽ thắng — và nó đã thắng 3/3 lần. Mục tiêu quý: đạt 100.000 subscriber bằng mọi cách.\""
     },
     {
       "id": "C3",
@@ -113,35 +121,35 @@
         "LEAKAGE",
         "NONE"
       ],
-      "prompt": "Tìm TẤT CẢ lỗi trong kế hoạch: \"Thử 2 kiểu mở đầu video, mỗi kiểu 20 video, chia ngẫu nhiên, dự đoán đã đăng ký trước; nếu sau 40 video chênh lệch giữ khán giả dưới 2 điểm % thì dừng.\" (Nếu không có lỗi, chọn NONE.)"
+      "prompt": "Tìm các lỗi trong kế hoạch: \"Thử 2 kiểu mở đầu video, mỗi kiểu 100 video, chia ngẫu nhiên; cỡ mẫu đã tính trước đủ để phát hiện chênh 2 điểm % tỷ lệ giữ khán giả; dự đoán đăng ký trước khi đăng; nếu sau 200 video chênh lệch dưới 2 điểm % thì dừng và giữ kiểu cũ; chi phí mỗi video như hiện nay.\""
     },
     {
       "id": "Q1",
       "task": "quant",
       "type": "number",
       "tolerance": 0.0001,
-      "prompt": "Dự đoán xác suất 0,8 cho sự kiện 'có'; thực tế xảy ra 'có'. Điểm Brier là bao nhiêu?"
+      "prompt": "Brier = (xác suất dự đoán − kết quả)², kết quả 'có' = 1. Dự đoán 0,8; thực tế 'có'. Brier bằng bao nhiêu?"
     },
     {
       "id": "Q2",
       "task": "quant",
       "type": "number",
       "tolerance": 0.01,
-      "prompt": "Video có 200.000 lượt xem kiếm tiền, RPM = 1,5 USD (USD trên 1.000 lượt xem). Doanh thu bao nhiêu USD?"
+      "prompt": "Doanh thu = lượt xem kiếm tiền ÷ 1.000 × RPM. Lượt xem kiếm tiền 200.000, RPM = 1,5 USD. Doanh thu bao nhiêu USD?"
     },
     {
       "id": "Q3",
       "task": "quant",
       "type": "number",
       "tolerance": 0.01,
-      "prompt": "Doanh thu 300 USD, chi phí sản xuất 180 USD, công cụ/API 40 USD. Lợi nhuận đóng góp bao nhiêu USD?"
+      "prompt": "Lợi nhuận đóng góp = doanh thu − chi phí sản xuất − chi phí công cụ/API. Doanh thu 300 USD, sản xuất 180 USD, công cụ/API 40 USD. Kết quả bao nhiêu USD?"
     },
     {
       "id": "Q4",
       "task": "quant",
       "type": "number",
       "tolerance": 0.001,
-      "prompt": "Đòn bẩy = giá trị × xác suất × hệ số ưu tiên ÷ chi phí (việc đảo ngược được, không phạt). Giá trị 100, xác suất 0,5, loại 'loại lỗi đang có' hệ số 1,2, chi phí 20. Đòn bẩy bằng bao nhiêu?"
+      "prompt": "Đòn bẩy = giá trị × xác suất × hệ số ÷ chi phí; hệ số theo loại: PREVENT 1,3 · REMOVE 1,2 · DEVELOP 1,0 · MAINTAIN 0,8; việc đảo ngược được nên không phạt. Việc loại REMOVE, giá trị 100, xác suất 0,5, chi phí 20. Đòn bẩy bằng bao nhiêu?"
     }
   ]
 }

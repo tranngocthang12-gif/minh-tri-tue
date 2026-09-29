@@ -29,8 +29,9 @@ def main(argv=None) -> int:
     sub.add_parser("skills")
     be = sub.add_parser("bench-export"); be.add_argument("suite")
     bg = sub.add_parser("bench-grade")
-    for x in ("suite", "key", "answers", "provider"):
+    for x in ("suite", "key", "answers", "provider", "session"):
         bg.add_argument(x)
+    bk = sub.add_parser("bench-check-key"); bk.add_argument("suite"); bk.add_argument("key")
     a = ap.parse_args(argv)
 
     led = PredictionLedger(brain.LEDGER)
@@ -44,7 +45,10 @@ def main(argv=None) -> int:
         for f in sorted(os.listdir(brain.BENCHMARKS)):
             if f.endswith(".json"):
                 sui = bench.load(os.path.join(brain.BENCHMARKS, f))
-                assert len(sui["key_sha256"]) == 64 and "answers" not in sui, f
+                if len(str(sui.get("key_sha256", ""))) != 64:
+                    raise bench.BenchError(f"{f}: thiếu key_sha256 hợp lệ.")
+                if bench.leaks(sui):
+                    raise bench.BenchError(f"{f}: có trường mang đáp án: {bench.leaks(sui)}")
         print("Đề benchmark: không lộ đáp án.")
     elif a.cmd == "domain":
         print("Đã mở miền:", create_domain(brain.DOMAINS, a.name, a.purpose))
@@ -72,13 +76,24 @@ def main(argv=None) -> int:
         print(bench.export_prompt(bench.load(a.suite)))
     elif a.cmd == "bench-grade":
         suite = bench.load(a.suite)
-        scores = bench.grade(suite, bench.load(a.key), bench.load(a.answers), a.provider)
+        scores = bench.grade(suite, bench.load(a.key), bench.load(a.answers), a.provider, a.session)
         reg = ProviderRegistry(brain.PROVIDERS)
         bench.record(reg, a.provider, suite["id"], scores); reg.save()
         print(json.dumps({"provider": a.provider, "suite": suite["id"], "scores": scores},
                          ensure_ascii=False, indent=2))
+    elif a.cmd == "bench-check-key":
+        bench.check_key(bench.load(a.suite), bench.load(a.key))
+        print("Đáp án khớp băm niêm phong của đề.")
     return 0
 
 
+def run() -> int:
+    try:
+        return main()
+    except (ValueError, FileExistsError, FileNotFoundError, KeyError) as e:
+        print(f"LỖI: {e}", file=sys.stderr)
+        return 2
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(run())

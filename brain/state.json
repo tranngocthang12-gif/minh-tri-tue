@@ -1,6 +1,6 @@
 {
   "project": "MINH TRÍ TUỆ — Universal Intelligence OS",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "canonical_brain": "GITHUB_REPOSITORY",
   "operating_mode": "ADVISE_ONLY",
   "owner_acts_in_world": true,
@@ -9,9 +9,10 @@
   "pending_decisions": [],
   "known_blind_spots": [
     "Chưa có kết quả thật nào — mọi hiểu biết hiện ở cấp L0/L1.",
-    "Benchmark tang1-core-v1 do claude soạn: claude không được chấm trên đề này; cần AI khác soạn đề để thi claude.",
-    "Chưa provider nào có đủ 5 lần thi mỗi việc — chưa có champion."
+    "Chỉ có một đề benchmark (tang1-core-v1, đề thử): claude là tác giả, grok đã đọc đề khi phản biện → chỉ chatgpt, gemini thi được. Chưa thể bầu champion.",
+    "Nguồn kết quả (source) trong sổ dự đoán do Owner khai — bộ não offline không tự kiểm được nguồn đo.",
+    "Chưa có lệnh CLI ghi bài học/kỹ năng — hiện chỉ gọi qua Python (v0.3)."
   ],
   "real_outcome_status": "NONE",
-  "next_bottleneck": "Chạy tang1-core-v1 cho chatgpt, gemini, grok; Owner giao mục tiêu đầu tiên để mở miền."
+  "next_bottleneck": "Owner chốt PR #1; sau đó giao mục tiêu đầu tiên để mở miền và có dự đoán thật."
 }

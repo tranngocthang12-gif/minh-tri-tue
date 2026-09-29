@@ -1,6 +1,8 @@
 """THANG HỌC L0–L9 và CỔNG NÂNG BÀI HỌC → KỸ NĂNG.
 
 Không được nói 'đã hiểu' vì đã đọc nhiều. Muốn lên cấp phải qua cổng bằng chứng.
+LƯU Ý: KỸ NĂNG ≠ CẤP HỌC. Một kỹ năng PROMOTED chỉ chứng tỏ dự đoán của nó đúng
+đủ nhiều và sống sót ba ghế; cấp học của MIỀN tính riêng bằng level_from_evidence.
 """
 from dataclasses import dataclass
 from enum import IntEnum
@@ -28,6 +30,7 @@ class GatePolicy:
     min_resolved: int = 5
     max_brier: float = 0.20          # 0.25 = đoán mò 50/50
     min_range_hit_rate: float = 0.60
+    max_rel_width: float = 1.0       # khoảng rộng hơn thế tính là trượt
 
 
 @dataclass
@@ -38,7 +41,7 @@ class GateResult:
 
 def skill_gate(score: Score, decision: Optional[Decision],
                policy: GatePolicy = GatePolicy()) -> GateResult:
-    """Cổng nâng một bài học thành KỸ NĂNG (L5 trở lên)."""
+    """Cổng nâng một bài học thành KỸ NĂNG (không phải cấp học)."""
     reasons: List[str] = []
     if score.resolved < policy.min_resolved:
         reasons.append(f"Mới {score.resolved} dự đoán đã chấm, cần ≥ {policy.min_resolved}.")
@@ -56,12 +59,16 @@ def skill_gate(score: Score, decision: Optional[Decision],
 
 
 def level_from_evidence(read_sources: int, predictions_registered: int, score: Score,
-                        acted: bool, survived_critique: bool) -> Level:
-    """Xếp cấp học thực tế — cấp chỉ tăng khi có bằng chứng của cấp đó."""
+                        acted: bool, survived_critique: bool,
+                        explained_conditions: bool = False) -> Level:
+    """Xếp cấp học thực tế — cấp chỉ tăng khi có bằng chứng của cấp đó, không nhảy bậc.
+    L2 cần đã giải thích điều kiện (khung ĐIỀU KIỆN của inquiry hoàn tất)."""
     lvl = Level.L0_MEMORY
     if read_sources > 0:
         lvl = Level.L1_KNOWLEDGE
-    if read_sources > 0 and predictions_registered > 0:
+    if lvl >= Level.L1_KNOWLEDGE and explained_conditions:
+        lvl = Level.L2_UNDERSTANDING
+    if lvl >= Level.L2_UNDERSTANDING and predictions_registered > 0:
         lvl = Level.L3_PREDICTION
     if lvl >= Level.L3_PREDICTION and acted:
         lvl = Level.L4_ACTION

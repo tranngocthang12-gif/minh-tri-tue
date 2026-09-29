@@ -1,6 +1,8 @@
 """NHÀ CUNG CẤP NHẬN THỨC — AI là nhân sự thay được, không phải bộ não.
 
-Mỗi AI thi trên cùng bộ benchmark theo từng loại việc. Thắng rõ ràng mới làm CHAMPION.
+- Tên provider được chuẩn hoá (claude-opus, anthropic → claude) để không lách luật bằng bí danh.
+- Mỗi (provider, đề, việc) chỉ được ghi MỘT lần — thi lại cùng đề không thành mẫu mới.
+- Champion cần ≥ min_samples ĐỀ KHÁC NHAU mỗi việc và phải hơn champion cũ ≥ margin.
 """
 import json
 import os
@@ -9,9 +11,26 @@ from typing import Dict, List, Optional
 
 TASKS = ["research", "critique", "writing", "quant", "coding", "directing", "finance"]
 
+CANONICAL = ("chatgpt", "claude", "gemini", "grok")
+_ALIASES = {
+    "chatgpt": ("chatgpt", "gpt", "openai", "o1", "o3", "o4"),
+    "claude": ("claude", "anthropic"),
+    "gemini": ("gemini", "google", "bard"),
+    "grok": ("grok", "xai", "x.ai"),
+}
+
 
 class ProviderError(ValueError):
     pass
+
+
+def canonical(name: str) -> str:
+    n = name.strip().lower()
+    for canon, prefixes in _ALIASES.items():
+        if any(n == p or n.startswith(p + "-") or n.startswith(p + " ") or n.startswith(p)
+               for p in prefixes):
+            return canon
+    raise ProviderError(f"Provider lạ '{name}'. Chỉ nhận: {', '.join(CANONICAL)}.")
 
 
 class ProviderRegistry:
@@ -29,28 +48,33 @@ class ProviderRegistry:
             f.write("\n")
 
     def add(self, name: str, model: str) -> None:
-        self.data["providers"].setdefault(name, {"model": model, "scores": {}, "failures": []})
+        self.data["providers"].setdefault(canonical(name), {"model": model, "scores": {}, "failures": []})
 
     def record(self, name: str, task: str, score: float, benchmark_id: str) -> None:
+        name = canonical(name)
         if task not in TASKS:
             raise ProviderError(f"Task lạ: {task}")
         if name not in self.data["providers"]:
             raise ProviderError(f"Chưa đăng ký provider {name}")
         if not 0.0 <= score <= 1.0:
             raise ProviderError("Điểm benchmark phải trong [0, 1].")
-        self.data["providers"][name]["scores"].setdefault(task, []).append(
-            {"score": score, "benchmark": benchmark_id})
+        rows = self.data["providers"][name]["scores"].setdefault(task, [])
+        if any(r["benchmark"] == benchmark_id for r in rows):
+            raise ProviderError(f"{name} đã có điểm {task} trên đề {benchmark_id} — không thi lại cùng đề.")
+        rows.append({"score": score, "benchmark": benchmark_id})
 
     def _mean(self, name: str, task: str) -> Optional[float]:
         s = self.data["providers"][name]["scores"].get(task, [])
-        return mean(x["score"] for x in s) if len(s) >= self.min_samples else None
+        distinct = {x["benchmark"] for x in s}
+        return mean(x["score"] for x in s) if len(distinct) >= self.min_samples else None
 
     def elect(self, task: str) -> Dict:
         """Chọn champion. Challenger chỉ thay khi hơn champion ≥ margin."""
         ranked = sorted(((m, n) for n in self.data["providers"]
                          if (m := self._mean(n, task)) is not None), reverse=True)
         if not ranked:
-            return {"task": task, "champion": None, "reason": "Chưa provider nào đủ mẫu thi."}
+            return {"task": task, "champion": None,
+                    "reason": f"Chưa provider nào thi đủ {self.min_samples} đề khác nhau."}
         best_score, best = ranked[0]
         current = self.data["champions"].get(task)
         cur_score = self._mean(current, task) if current in self.data["providers"] else None

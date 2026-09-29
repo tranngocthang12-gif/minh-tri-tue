@@ -3,6 +3,7 @@
 Mỗi dòng JSONL có prev_hash và hash. Sửa một dòng cũ làm gãy chuỗi.
 """
 import json
+import math
 import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional
@@ -73,7 +74,8 @@ class PredictionLedger:
     def register(self, pid: str, domain: str, question: str, provider: str,
                  probability: Optional[float] = None,
                  low: Optional[float] = None, high: Optional[float] = None,
-                 resolve_by: Optional[str] = None, rationale: str = "") -> dict:
+                 resolve_by: Optional[str] = None, rationale: str = "",
+                 skill: Optional[str] = None) -> dict:
         if pid in self._index():
             raise LedgerError(f"Dự đoán {pid} đã tồn tại.")
         binary = probability is not None
@@ -82,12 +84,16 @@ class PredictionLedger:
             raise LedgerError("Chọn đúng một dạng: probability (có/không) HOẶC khoảng [low, high].")
         if binary and not 0.0 <= probability <= 1.0:
             raise LedgerError("probability phải trong [0, 1].")
-        if ranged and low > high:
-            raise LedgerError("low > high.")
+        if ranged:
+            if low > high:
+                raise LedgerError("low > high.")
+            if not (math.isfinite(low) and math.isfinite(high)):
+                raise LedgerError("Khoảng dự đoán phải hữu hạn.")
         return self._append({
             "type": "PREDICTION", "id": pid, "domain": domain, "question": question,
             "provider": provider, "probability": probability, "low": low, "high": high,
-            "resolve_by": resolve_by, "rationale": rationale, "registered_at": now_iso(),
+            "resolve_by": resolve_by, "rationale": rationale, "skill": skill,
+            "registered_at": now_iso(),
         })
 
     def resolve(self, pid: str, outcome, source: str) -> dict:
@@ -101,11 +107,16 @@ class PredictionLedger:
         p = idx[pid]
         if p["probability"] is not None and outcome not in (True, False, 0, 1):
             raise LedgerError("Dự đoán có/không cần outcome True/False.")
-        return self._append({"type": "RESOLUTION", "prediction_id": pid,
-                             "outcome": outcome, "source": source, "resolved_at": now_iso()})
+        now = now_iso()
+        late = bool(p.get("resolve_by")) and now[:10] > str(p["resolve_by"])[:10]
+        return self._append({"type": "RESOLUTION", "prediction_id": pid, "outcome": outcome,
+                             "source": source, "resolved_at": now, "late": late})
 
     def score(self, domain: Optional[str] = None, provider: Optional[str] = None,
-              ids: Optional[List[str]] = None) -> Score:
+              ids: Optional[List[str]] = None,
+              max_rel_width: Optional[float] = None) -> Score:
+        """max_rel_width: khoảng rộng hơn (high-low)/max(|giữa|,1) bị tính là TRƯỢT —
+        chặn việc đoán khoảng vô tận để 'trúng' 100%."""
         entries = self.entries()
         preds = {e["id"]: e for e in entries if e["type"] == "PREDICTION"}
         bs, hits = [], []
@@ -122,7 +133,9 @@ class PredictionLedger:
             if p["probability"] is not None:
                 bs.append((p["probability"] - (1.0 if e["outcome"] else 0.0)) ** 2)
             else:
-                hits.append(1.0 if p["low"] <= float(e["outcome"]) <= p["high"] else 0.0)
+                width = (p["high"] - p["low"]) / max(abs((p["high"] + p["low"]) / 2), 1.0)
+                sharp = max_rel_width is None or width <= max_rel_width
+                hits.append(1.0 if sharp and p["low"] <= float(e["outcome"]) <= p["high"] else 0.0)
         return Score(
             resolved=len(bs) + len(hits),
             binary_n=len(bs), brier=(sum(bs) / len(bs)) if bs else None,
