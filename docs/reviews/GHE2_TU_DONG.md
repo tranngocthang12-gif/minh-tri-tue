@@ -6,7 +6,7 @@
 
 ## Cách chạy
 - **Tự động:** mỗi PR `opened` / `synchronize` (commit mới) / `reopened`. Lần chạy mới hủy lần cũ đang chạy của cùng PR.
-- **Tay:** Actions → `ghe2-grok` → *Run workflow* → nhập số PR.
+- **Tay (PR đã mở, không cần commit mới):** Actions → `ghe2-grok` → *Run workflow* → nhập số PR.
 - Kết quả là một comment trên PR, dòng đầu:
   `KẾT QUẢ PHẢN BIỆN — PR #<n> — provider: grok · session: gh-action-<run_id> · head: <sha> · model: <model>`,
   tiếp theo là nguyên văn trả lời của Grok. Cuối comment có ghi chú ẩn `<!-- ghe2-usage: … -->` chứa số token.
@@ -36,5 +36,8 @@ Mỗi commit mới đẩy lên PR là một lần chạy. Số token thật củ
 - Tệp nhị phân / tệp quá lớn GitHub không trả patch → chỉ có tên tệp.
 - **Lỗi không chặn CI:** lỗi API/mạng → comment ngắn "Ghế 2 tự động lỗi: <mã lỗi>, không có phán quyết", thoát mã 0. Không có phán quyết ≠ ACCEPT.
 - PR từ fork không nhận được Secret → Action không đăng được comment (token chỉ đọc); cần chạy tay.
-- Workflow chạy mã và lời nhắc **của chính PR** (nhánh PR). Một PR có thể sửa `LOI_NHAC_GHE2.md` hoặc script để làm yếu phản biện; Owner phải đọc kỹ PR nào đụng vào hai tệp này. Sau khi merge có thể chuyển sang chạy bản trên `main` để chặn việc này.
-- Theo CONTRIBUTING luật 2, comment Grok tính là phản biện của phiên khác, nhưng **không thay** Owner chốt merge.
+- Script `minhtri/tools/ghe2_grok.py` và lời nhắc `LOI_NHAC_GHE2.md` được lấy **từ `main`**, không từ nhánh PR — PR sửa hai tệp này chỉ có tác dụng sau khi merge. **Ngoại lệ khởi tạo:** PR #4 (PR đưa Ghế 2 vào repo) chạy bằng bản của chính nhánh PR vì `main` chưa có; PR khác mà `main` chưa có hai tệp thì bị bỏ qua.
+- Còn hở: tệp workflow `.github/workflows/ghe2-grok.yml` với sự kiện `pull_request` vẫn lấy **từ nhánh PR** (GitHub quy định), nên PR sửa chính workflow vẫn đổi được cách chạy. Owner phải đọc kỹ PR nào đụng vào tệp này.
+- Grok được báo tệp luật (`LUAT_KIEN_TRUC_TOI_CAO.md`, `CONSTITUTION.md`) có hay chưa trên head PR; thiếu thì Grok phải ghi "chưa có tệp luật trên nhánh này".
+- Trả lời Grok dài quá giới hạn comment GitHub thì bị cắt và ghi rõ.
+- Theo CONTRIBUTING luật 2, comment Grok tính là phản biện của AI khác nhà cung cấp, nhưng **không thay** Owner chốt merge.

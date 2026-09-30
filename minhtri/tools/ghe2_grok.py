@@ -1,6 +1,6 @@
 """Ghế 2 tự động — gửi mô tả PR + diff cho Grok, đăng "KẾT QUẢ PHẢN BIỆN" lên PR.
 
-Chạy trong GitHub Action (.github/workflows/ghe2-grok.yml):
+Chạy trong GitHub Action (.github/workflows/ghe2-grok.yml), bằng bản trên `main`:
     python -m minhtri.tools.ghe2_grok
 
 Biến môi trường:
@@ -30,6 +30,9 @@ PROMPT_PATH = os.path.join(ROOT, "docs", "reviews", "LOI_NHAC_GHE2.md")
 TRUNCATED_NOTE = "⚠ diff đã cắt"
 
 LAW_FILES = ("CONSTITUTION.md", "CONTRIBUTING.md", "ARCHITECTURE.md")
+# tệp luật báo cho Grok có/không trên head PR (Grok không đọc được repo)
+SUPREME_LAWS = ("LUAT_KIEN_TRUC_TOI_CAO.md", "CONSTITUTION.md")
+COMMENT_LIMIT = 65000  # GitHub giới hạn comment 65.536 ký tự
 
 
 def priority(path):
@@ -100,7 +103,12 @@ def comment_header(pr_number, run_id, sha, model):
 
 def build_comment(pr_number, run_id, sha, model, reply, usage=None):
     """Dòng đầu cố định + nguyên văn trả lời của Grok (+ ghi chú token ẩn)."""
-    body = comment_header(pr_number, run_id, sha, model) + "\n\n" + reply.strip() + "\n"
+    header = comment_header(pr_number, run_id, sha, model) + "\n\n"
+    reply = reply.strip()
+    room = COMMENT_LIMIT - len(header) - 200
+    if len(reply) > room:
+        reply = reply[:room] + "\n\n⚠ trả lời Grok bị cắt do giới hạn độ dài comment GitHub"
+    body = header + reply + "\n"
     if usage:
         body += "\n<!-- ghe2-usage: " + json.dumps(usage, ensure_ascii=False) + " -->\n"
     return body
@@ -110,7 +118,12 @@ def build_error_comment(code):
     return f"Ghế 2 tự động lỗi: {code}, không có phán quyết"
 
 
-def build_user_message(pr, files, diff_text, truncated):
+def law_status_lines(present):
+    """present: {tên tệp: True/False} → dòng báo tệp luật có/thiếu trên head."""
+    return [f"- {name}: {'có' if ok else 'chưa có tệp luật trên nhánh này'}" for name, ok in present.items()]
+
+
+def build_user_message(pr, files, diff_text, truncated, laws=None):
     lines = [
         f"PHẢN BIỆN PR #{pr['number']}",
         f"Tiêu đề: {pr.get('title', '')}",
@@ -124,6 +137,8 @@ def build_user_message(pr, files, diff_text, truncated):
     ]
     lines += [f"- {f['filename']} ({f.get('status', '?')}, +{f.get('additions', 0)} -{f.get('deletions', 0)})"
               for f in files]
+    if laws is not None:
+        lines += ["", "## Tệp luật trên nhánh này"] + law_status_lines(laws)
     lines += ["", "## Diff" + (f" ({TRUNCATED_NOTE})" if truncated else ""), diff_text]
     return "\n".join(lines)
 
@@ -198,6 +213,13 @@ class GitHub:
                 return out
             page += 1
 
+    def exists(self, path, ref):
+        r = self.s.get(f"{self.base}/contents/{path}", params={"ref": ref}, timeout=60)
+        if r.status_code == 404:
+            return False
+        r.raise_for_status()
+        return True
+
     def comment(self, n, body):
         r = self.s.post(f"{self.base}/issues/{n}/comments", json={"body": body}, timeout=60)
         r.raise_for_status()
@@ -227,7 +249,8 @@ def main(env=None, gh=None, post=None):
     diff_text, truncated = truncate_diff(files)
     with open(PROMPT_PATH, encoding="utf-8") as fh:
         system_prompt = fh.read()
-    user_message = build_user_message(pr, files, diff_text, truncated)
+    laws = {name: gh.exists(name, sha) for name in SUPREME_LAWS}
+    user_message = build_user_message(pr, files, diff_text, truncated, laws)
     print(f"PR #{n} head {sha} · {len(files)} tệp · diff {len(diff_text)} ký tự"
           f"{' (đã cắt)' if truncated else ''} · model {model}")
 

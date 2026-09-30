@@ -1,6 +1,7 @@
 name: ghe2-grok
 # Ghế 2 tự động: gửi mô tả PR + diff cho Grok, đăng "KẾT QUẢ PHẢN BIỆN" lên PR.
 # Chỉ đăng comment — không merge, không đổi mã (Điều 2). Xem docs/reviews/GHE2_TU_DONG.md.
+# Chạy tay cho PR đã mở: Actions → ghe2-grok → Run workflow → nhập số PR.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -27,16 +28,42 @@ jobs:
        !contains(github.event.pull_request.labels.*.name, 'skip-ghe2'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+      # Ngoại lệ khởi tạo: PR #4 là PR đưa Ghế 2 tự động vào repo, nên main chưa có script/lời nhắc.
+      BOOTSTRAP_PR: "4"
     steps:
+      # Script và lời nhắc lấy từ main, không từ nhánh PR — PR không tự làm yếu được phản biện của chính nó.
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - name: Kiểm bản trên main (ngoại lệ khởi tạo)
+        id: src
+        run: |
+          if [ -f minhtri/tools/ghe2_grok.py ] && [ -f docs/reviews/LOI_NHAC_GHE2.md ]; then
+            echo "Dùng script và lời nhắc trên main ($(git rev-parse --short HEAD))."
+            echo "bootstrap=false" >> "$GITHUB_OUTPUT"
+          elif [ "$PR_NUMBER" = "$BOOTSTRAP_PR" ]; then
+            echo "::warning::Ngoại lệ khởi tạo: main chưa có Ghế 2 — PR #$PR_NUMBER dùng script/lời nhắc của chính nhánh PR."
+            echo "bootstrap=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::main chưa có minhtri/tools/ghe2_grok.py hoặc docs/reviews/LOI_NHAC_GHE2.md — bỏ qua, không phản biện."
+            echo "bootstrap=skip" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.src.outputs.bootstrap == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{ env.PR_NUMBER }}/head
+      - if: steps.src.outputs.bootstrap != 'skip'
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests
+      - if: steps.src.outputs.bootstrap != 'skip'
+        run: pip install requests
       - name: Grok phản biện
+        if: steps.src.outputs.bootstrap != 'skip'
         env:
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
           GROK_MODEL: ${{ vars.GROK_MODEL }}
         run: python -m minhtri.tools.ghe2_grok

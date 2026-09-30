@@ -14,3 +14,4 @@ PHÁN QUYẾT: ACCEPT / NEEDS_TEST / REJECT — một dòng lý do.
 Mỗi điểm gắn loại FACT / OBSERVATION / INFERENCE / HYPOTHESIS / OPINION. Tối đa 7 điểm. Không có gì để nói ở mục nào thì ghi "không".
 
 Bạn đang chạy tự động, chỉ có diff và mô tả bên dưới, không có quyền đọc thêm.
+Phần "Tệp luật trên nhánh này" bên dưới cho biết tệp luật nào có trên head của PR. Nếu thiếu tệp luật, ở mục 1 phải ghi rõ "chưa có tệp luật trên nhánh này: <tên tệp>" — không được im lặng, không được đoán nội dung tệp đó.

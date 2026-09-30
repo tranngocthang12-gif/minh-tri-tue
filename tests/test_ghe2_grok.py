@@ -24,9 +24,13 @@ class FakeResp:
 class FakeGitHub:
     def __init__(self, pr, files):
         self._pr, self._files, self.comments = pr, files, []
+        self.present = {"CONSTITUTION.md"}
 
     def pr(self, n):
         return self._pr
+
+    def exists(self, path, ref):
+        return path in self.present
 
     def files(self, n):
         return self._files
@@ -85,6 +89,11 @@ class TestComment(unittest.TestCase):
         self.assertIn(reply, body)
         self.assertIn("ghe2-usage", body)
 
+    def test_long_reply_capped(self):
+        body = g.build_comment(7, "42", "abc", "grok-4", "x" * 100000)
+        self.assertLessEqual(len(body), g.COMMENT_LIMIT)
+        self.assertIn("bị cắt", body)
+
     def test_error_comment(self):
         self.assertEqual(g.build_error_comment("HTTP 401"), "Ghế 2 tự động lỗi: HTTP 401, không có phán quyết")
 
@@ -109,7 +118,11 @@ class TestMain(unittest.TestCase):
         self.assertEqual(sent["json"]["model"], "grok-4")
         self.assertEqual(sent["json"]["temperature"], 0.2)
         self.assertIn("không có quyền đọc thêm", sent["json"]["messages"][0]["content"])
-        self.assertIn("+m", sent["json"]["messages"][1]["content"])
+        user = sent["json"]["messages"][1]["content"]
+        self.assertIn("+m", user)
+        self.assertIn("- LUAT_KIEN_TRUC_TOI_CAO.md: chưa có tệp luật trên nhánh này", user)
+        self.assertIn("- CONSTITUTION.md: có", user)
+        self.assertIn("chưa có tệp luật trên nhánh này", sent["json"]["messages"][0]["content"])
         self.assertTrue(comments[0].startswith("KẾT QUẢ PHẢN BIỆN — PR #7 — provider: grok"))
         self.assertIn("PHÁN QUYẾT: ACCEPT", comments[0])
 
@@ -138,6 +151,16 @@ class TestMain(unittest.TestCase):
         for p in (pr(labels=[{"name": "skip-ghe2"}]), pr(user={"login": "github-actions[bot]", "type": "Bot"})):
             rc, comments = self.run_main(boom, pr_obj=p)
             self.assertEqual((rc, comments), (0, []))
+
+    def test_dispatch_skip_label_and_bot_before_any_call(self):
+        # workflow_dispatch không qua điều kiện `if` của job → script phải tự chặn
+        class NoCall(FakeGitHub):
+            def files(self, n):
+                raise AssertionError("không được đọc diff")
+        for p in (pr(labels=[{"name": "skip-ghe2"}]), pr(user={"login": "x[bot]", "type": "Bot"})):
+            gh = NoCall(p, [])
+            self.assertEqual(g.main(env=dict(ENV), gh=gh, post=lambda *a, **k: self.fail("gọi Grok")), 0)
+            self.assertEqual(gh.comments, [])
 
     def test_missing_key(self):
         rc, comments = self.run_main(lambda *a, **k: self.fail("không gọi"), env={"XAI_API_KEY": ""})
