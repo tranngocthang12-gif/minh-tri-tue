@@ -1,6 +1,7 @@
 {
-  "sha256": "151e7b47d3c76202216cbace3895a6cdf9547e45f996e399c75a4a9eb19558e2",
+  "sha256": "1d84896be013b34186dd7787c583dcad47c638af07b8a9c9358a36aa7eaf0595",
   "version": "1.0",
   "adr": "docs/adr/0001-luat-kien-truc-toi-cao.md",
-  "effective": "2026-09-30"
+  "effective": "2026-09-30",
+  "revision": "r3 (PR #3, trước khi có hiệu lực)"
 }

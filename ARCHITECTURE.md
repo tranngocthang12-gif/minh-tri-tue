@@ -51,7 +51,7 @@ bench.py ── đề công khai, ĐÁP ÁN NIÊM PHONG ngoài repo (chỉ lưu 
 
 tools/check_append_only.py ── CI so sổ với commit gốc: dòng cũ phải còn nguyên
    │
-   └──────────── ↺ (L7 học cách học, L8 tự sửa — CHƯA có, lộ trình v0.3)
+   └──────────── ↺ (L7 học cách học, L8 tự sửa — CHƯA có, lộ trình v0.5)
 ```
 
 ## Bộ não chuẩn (`brain/`)

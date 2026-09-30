@@ -20,4 +20,10 @@ khoá thành luật, và có các lỗ kiến trúc mà phản biện cấp dòn
 ## Hệ quả
 Mọi phiên AI tốn thêm vài phút đọc bàn giao. Đổi lại: không phiên nào làm lệch ý tưởng mà không bị phát hiện.
 
+## Chương I
+Ban hành lần đầu: Chương I được **viết ra lần đầu** từ ý tưởng Owner trong chat và sổ ghi nhớ dự án — không làm rõ, không đảo ngược bản nào trước đó.
+
+## Phiên bản
+Khoá `1.0` = bản ban hành đầu tiên. Nội dung thay đổi 3 lần **trong PR #3, trước khi có hiệu lực** (r1 → r3, theo phản biện Grok), nên không có bản nào khác từng hiệu lực; trường `revision` của `brain/law.lock` ghi lần sửa nháp.
+
 OWNER-APPROVED: 2026-09-30 — nguồn: Owner ra lệnh trong chat Claude (Project MINH TRÍ TRÍ TUỆ, phiên claude-chat-2026-09-30-law): "XÂY BỘ LUẬT KIẾN TRÚC TỐI CAO, BẢO VỆ Ý TƯỞNG KIẾN TRÚC. VÀ CÓ LUẬT BÀN GIAO". Owner tự tay bấm merge PR (Chương V.5).

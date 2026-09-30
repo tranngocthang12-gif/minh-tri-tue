@@ -76,7 +76,7 @@ Không ai ghi thẳng vào `main`. Thực thi bằng **bảo vệ nhánh GitHub*
 Không tuyên bố một việc "đã xong/đã lên" khi chưa **xác minh trên remote** (mã commit, HTTP 200, CI).
 Lệnh giao việc ghi rõ **gửi cho AI/app nào**. Phát hiện chỗ tài liệu nói khác mã → đó là lỗi, không phải chi tiết.
 
-**Điều 14 — Liên tục giữa các phiên.** ⚠ V7
+**Điều 14 — Liên tục giữa các phiên.** ⚠ V11, V13
 Mọi phiên làm việc (chat cũ, chat mới, AI nào) **phải** mở và đóng theo `BAN_GIAO.md`. Phiên không đọc bàn giao
 thì không được sửa repo.
 
@@ -115,7 +115,8 @@ bị trái và đề nghị hai đường: (a) Owner sửa luật theo Chương 
    `OWNER-APPROVED: <yyyy-mm-dd> — <nguồn>`.
 3. PR đó cập nhật `brain/law.lock` (băm mới, phiên bản mới, tên ADR).
 4. Chương I (Ý tưởng gốc) chỉ được **làm rõ**, không được **đảo ngược**; muốn đảo ngược ý tưởng gốc là mở dự án khác.
-   Mọi ADR chạm Chương I phải trả lời rõ: "Đây là làm rõ hay đảo ngược?" — Owner quyết.
+   ADR của PR làm đổi chữ Chương I phải có dòng `CHƯƠNG-I: LÀM RÕ — <lý do>`; CI chặn nếu thiếu dòng đó
+   hoặc nếu ghi `CHƯƠNG-I: ĐẢO NGƯỢC`.
 5. **Giới hạn hiện tại (⚠ V12).** Các AI thi công đang dùng chính tài khoản GitHub của Owner, nên CI **không phân biệt
    được** Owner với AI. Dòng `OWNER-APPROVED` hiện chỉ là **tín hiệu, không phải bằng chứng**. Cho tới khi AI dùng
    tài khoản riêng không có quyền quản trị và `main` bắt review của Owner cho tệp được bảo vệ:

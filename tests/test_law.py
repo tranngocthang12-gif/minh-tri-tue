@@ -101,6 +101,28 @@ class TestLawAmendmentGate(unittest.TestCase):
         run("git", "-c", "user.email=a@b", "-c", "user.name=t", "commit", "-qm", "c")
         self.assertEqual(self.check(d, base), 1)
 
+    def edit_ch1(self, d, run, adr_text):
+        p = os.path.join(d, "LUAT_KIEN_TRUC_TOI_CAO.md")
+        t = open(p, encoding="utf-8").read().replace("Cơ hội thay đổi; **bộ não ở lại**.",
+                                                     "Cơ hội thay đổi; bộ não thuộc về một AI.")
+        open(p, "w", encoding="utf-8").write(t)
+        self.amend(d, run, adr_text)
+
+    def test_chapter_one_change_needs_clarify_line(self):
+        d, run, base = self.repo()
+        self.edit_ch1(d, run, "OWNER-APPROVED: 2026-10-01 — nguồn: chat\n")
+        self.assertEqual(self.check(d, base), 1)
+
+    def test_chapter_one_reversal_blocked(self):
+        d, run, base = self.repo()
+        self.edit_ch1(d, run, "OWNER-APPROVED: 2026-10-01 — nguồn: chat\nCHƯƠNG-I: ĐẢO NGƯỢC\n")
+        self.assertEqual(self.check(d, base), 1)
+
+    def test_chapter_one_clarify_passes(self):
+        d, run, base = self.repo()
+        self.edit_ch1(d, run, "OWNER-APPROVED: 2026-10-01 — nguồn: chat\nCHƯƠNG-I: LÀM RÕ — thử\n")
+        self.assertEqual(self.check(d, base), 0)
+
     def test_amend_with_unapproved_adr_fails(self):
         d, run, base = self.repo()
         self.amend(d, run, "# ADR 0002\nChưa duyệt.\n")
@@ -163,6 +185,12 @@ class TestHandoverGate(unittest.TestCase):
         d, base = self.repo()
         self.add_entry(d, base); self.commit(d, "w", touch="b.txt")
         self.assertEqual(self.check(d, base, body="không có dòng mở phiên"), 1)
+
+    def test_duplicate_session_rejected(self):
+        d, base = self.repo()
+        self.add_entry(d, base, session="dup"); self.add_entry(d, base, session="dup")
+        self.commit(d, "w", touch="b.txt")
+        self.assertEqual(self.check(d, base), 1)
 
     def test_no_entry_rejected(self):
         d, base = self.repo()

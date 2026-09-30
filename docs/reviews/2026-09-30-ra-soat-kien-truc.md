@@ -34,3 +34,23 @@ Ghế 1 (claude): **chấp nhận cả 9 ý**.
 | 7 | MINOR | CHẤP NHẬN | Lộ trình: L7/L8 dời v0.5. |
 | 8 | MINOR | CHẤP NHẬN MỘT PHẦN | Mô tả PR được CI kiểm; dòng `MỞ PHIÊN` trong chat thì không thể — ghi V13. |
 | 9 | MINOR | GHI NHẬN | Owner đã ra lệnh; `next` của sổ bàn giao chốt v0.3 là sửa V1–V3 trước mọi tính năng mới. |
+
+
+### Vòng 2 (head `1f8d0ef`) — Grok APPROVE; Ghế 1 sửa nốt (r3)
+
+| Ý | Ghế 1 | Đã làm |
+|---|---|---|
+| 5 (còn lại) | CHẤP NHẬN | CI kiểm Chương I: PR làm đổi chữ Chương I phải có ADR ghi `CHƯƠNG-I: LÀM RÕ — <lý do>`; ghi `ĐẢO NGƯỢC` bị chặn. ADR 0001 trả lời rõ: ban hành lần đầu. |
+| 7 / N1 | CHẤP NHẬN | Sơ đồ ARCHITECTURE: L7/L8 → v0.5, khớp lộ trình chữ. |
+| N2 | CHẤP NHẬN | Thêm test trùng `session` → CI đỏ. |
+| N3 | CHẤP NHẬN | Điều 14 gắn đúng ⚠ V11, V13 (bỏ V7 gắn nhầm). |
+| N4 | CHẤP NHẬN MỘT PHẦN | Không nâng `1.1`: chưa từng có bản `1.0` nào có hiệu lực — ghi `1.1` là nói sai (Điều 13). Thêm trường `revision: r3` vào khoá và giải thích trong ADR 0001. |
+| 1, 2 | GHI NHẬN | V11, V12 vẫn MỞ đúng như Grok nói; V12 chờ Owner quyết. |
+
+
+### r4 — lỗi thiết kế CI do Claude Code (thi công) phát hiện
+
+Push nhánh bị so với commit trước **trên cùng nhánh** (`github.event.before`). Bản nháp trong PR được phép viết lại
+(sổ bàn giao, băm luật) so với nhau — chỉ không được viết lại những gì **đã vào `main`**. Hệ quả: mọi lần sửa lại
+PR (r2, r3…) làm lượt CI khi push đỏ giả. Sửa: push nhánh khác `main` so với **điểm tách khỏi `main`**
+(`git merge-base HEAD origin/main`); PR và push vào `main` giữ nguyên. Ghi nhận: lỗi của Ghế 1 (thiết kế CI), không phải của nội dung r3.

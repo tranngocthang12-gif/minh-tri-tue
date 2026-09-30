@@ -20,6 +20,13 @@ PROTECTED = {LAW, LOCK, "CONSTITUTION.md"}
 APPROVED = re.compile(r"^OWNER-APPROVED:\s*\d{4}-\d{2}-\d{2}\s+—\s+\S", re.M)  # phải ghi nguồn (Chương V.5)
 
 
+def chapter_one(text: str) -> str:
+    if "## CHƯƠNG I" not in text:
+        return ""
+    part = text.split("## CHƯƠNG I", 1)[1]
+    return part.split("## CHƯƠNG II", 1)[0].strip()
+
+
 def changed(base: str, status: str = "ACMRD") -> list:
     r = subprocess.run(["git", "diff", "--name-status", f"--diff-filter={status}", f"{base}...HEAD"],
                        capture_output=True, text=True, check=True)
@@ -46,6 +53,16 @@ def main(base) -> int:
         print("LUẬT BỊ SỬA mà không có ADR mới mang dòng OWNER-APPROVED (Chương V)."); return 1
     if os.path.basename(lock.get("adr", "")) not in {os.path.basename(f) for f in ok}:
         print(f"brain/law.lock phải trỏ tới ADR mới: {', '.join(ok)}"); return 1
+    old = subprocess.run(["git", "show", f"{base}:{LAW}"], capture_output=True, text=True)
+    if old.returncode == 0:
+        with open(LAW, encoding="utf-8") as f:
+            now = f.read()
+        if chapter_one(old.stdout) != chapter_one(now):
+            texts = [open(f, encoding="utf-8").read() for f in ok]
+            if any(re.search(r"^CHƯƠNG-I:\s*ĐẢO NGƯỢC", t, re.M) for t in texts):
+                print("Đảo ngược Chương I (Ý tưởng gốc) bị cấm — đó là mở dự án khác (Chương V.4)."); return 1
+            if not any(re.search(r"^CHƯƠNG-I:\s*LÀM RÕ\s+—\s+\S", t, re.M) for t in texts):
+                print("Chương I bị đổi chữ: ADR phải có dòng 'CHƯƠNG-I: LÀM RÕ — <lý do>' (Chương V.4)."); return 1
     print(f"Sửa luật hợp lệ theo Chương V: {', '.join(ok)}"); return 0
 
 
