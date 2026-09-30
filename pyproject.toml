@@ -1,5 +1,5 @@
 [project]
 name = "minhtri"
-version = "0.2.3"
+version = "0.3.0"
 description = "MINH TRÍ TUỆ — Universal Intelligence OS, Tầng 1"
 requires-python = ">=3.10"

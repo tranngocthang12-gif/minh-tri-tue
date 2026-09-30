@@ -24,3 +24,9 @@ python -m minhtri.cli status               # xem trạng thái bộ não
 python -m minhtri.cli verify               # kiểm chuỗi băm sổ dự đoán
 python -m minhtri.cli domain youtube "Kiếm tiền bền vững bằng YouTube"
 ```
+
+### Ghế 2 tự động (Grok phản biện PR)
+Mỗi PR mở/có commit mới, Action `ghe2-grok` gửi mô tả PR + diff cho Grok và đăng "KẾT QUẢ PHẢN BIỆN" lên PR.
+Đây là công cụ vận hành repo (`minhtri/tools/`), không thuộc lõi bộ não; cần mạng, `requests` và Secret `XAI_API_KEY`.
+**Đổi model:** Settings → Secrets and variables → Actions → tab *Variables* → tạo/sửa biến `GROK_MODEL`
+(ví dụ `grok-4`, `grok-3-mini`). Không đặt → mặc định `grok-4`. Chi tiết: [`docs/reviews/GHE2_TU_DONG.md`](docs/reviews/GHE2_TU_DONG.md).
