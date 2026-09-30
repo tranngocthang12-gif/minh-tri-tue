@@ -217,6 +217,27 @@ class TestHandoverGate(unittest.TestCase):
         self.add_entry(d, base, session="s2"); self.commit(d, "w")
         self.assertEqual(self.check(d, base), 1)
 
+    def test_branch_merged_main_keeps_old_fork_points(self):
+        # nhánh PR gộp main (git merge main): dòng cũ mang điểm tách cũ, dòng cuối mang điểm tách mới
+        d, base = self.repo()
+        self.add_entry(d, base, session="s1"); self.commit(d, "w1")
+        self.run_("git", "checkout", "-q", "main"); self.commit(d, "m1", touch="m.txt")
+        base2 = self.head(d)
+        self.run_("git", "checkout", "-q", "f")
+        self.run_("git", "-c", "user.email=a@b", "-c", "user.name=t", "merge", "-q", "--no-edit", "main")
+        self.add_entry(d, base2, session="s2"); self.commit(d, "w2")
+        self.assertEqual(self.check(d, base2), 0)
+
+    def test_merged_main_last_entry_needs_current_fork(self):
+        d, base = self.repo()
+        self.add_entry(d, base, session="s1"); self.commit(d, "w1")
+        self.run_("git", "checkout", "-q", "main"); self.commit(d, "m1", touch="m.txt")
+        base2 = self.head(d)
+        self.run_("git", "checkout", "-q", "f")
+        self.run_("git", "-c", "user.email=a@b", "-c", "user.name=t", "merge", "-q", "--no-edit", "main")
+        self.add_entry(d, base, session="s2"); self.commit(d, "w2")  # phiên mới khai điểm tách cũ
+        self.assertEqual(self.check(d, base2), 1)
+
     def test_no_entry_rejected(self):
         d, base = self.repo()
         self.commit(d, "w", touch="b.txt")

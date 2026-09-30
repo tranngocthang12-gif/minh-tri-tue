@@ -6,6 +6,8 @@
   commit gốc hoặc trong các commit của thay đổi; dòng mới CUỐI phải khớp luật hiện hành
   (luật được sửa theo Chương V giữa các phiên của cùng một PR thì dòng cũ vẫn mang băm bản mình đã đọc),
   `started_from` = đúng điểm tách nhánh khỏi main (merge-base) — không được lấy commit cổ bất kỳ.
+  Nhánh PR đã gộp main (git merge main) thì dòng mới trước đó được mang điểm tách mà nhánh từng có
+  (merge-base của main với một commit của PR); dòng mới CUỐI phải mang điểm tách hiện tại.
 - Với PR: mô tả PR (biến môi trường PR_BODY) phải có dòng bắt đầu bằng "MỞ PHIÊN ·".
 Dùng: python tools/check_handover.py <base-ref>
 """
@@ -44,6 +46,16 @@ def law_versions(base):
     return out
 
 
+def fork_points(base):
+    """Mọi điểm tách khỏi main mà nhánh từng có: merge-base(base, c) với mỗi commit c của PR."""
+    out = set()
+    for c in git("rev-list", f"{base}..HEAD").stdout.split():
+        mb = git("merge-base", base, c).stdout.strip()
+        if mb:
+            out.add(mb)
+    return out
+
+
 def main(base) -> int:
     if not base:
         print("Không có commit gốc — bỏ qua."); return 0
@@ -65,6 +77,7 @@ def main(base) -> int:
     used = {json.loads(l)["session"] for l in old}
     law = law_sha256(".")
     known = law_versions(base) | {law}
+    forks = fork_points(base) | {fork}
     for i, line in enumerate(new):
         e = json.loads(line)
         # dòng cuối phải đọc luật hiện hành; dòng trước đó chỉ cần đọc một bản luật thật của thay đổi này
@@ -80,8 +93,11 @@ def main(base) -> int:
             # push vào main (merge): phiên phải mở từ một commit đã có trên main trước lần push này
             if git("merge-base", "--is-ancestor", e["started_from"], base).returncode != 0:
                 print(f"started_from {e['started_from'][:12]} không nằm trong lịch sử main trước push."); return 1
-        elif e["started_from"] != fork:
+        elif i == len(new) - 1 and e["started_from"] != fork:
             print(f"started_from {e['started_from'][:12]} ≠ điểm tách nhánh {fork[:12]} — phiên không mở từ main thật.")
+            return 1
+        elif e["started_from"] not in forks:
+            print(f"started_from {e['started_from'][:12]} không phải điểm tách nào của nhánh — phiên không mở từ main thật.")
             return 1
     print(f"Sổ bàn giao: {len(new)} dòng mới hợp lệ."); return 0
 
