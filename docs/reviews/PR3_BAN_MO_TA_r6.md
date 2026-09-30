@@ -16,6 +16,7 @@
 3. FACT — `brain/law.lock`: băm `1d84896b…` → `0212d5dc…`, `revision` r6, `adr` → ADR 0002, `version` giữ `1.0` (luật chưa từng hiệu lực).
 4. FACT — Sổ rà soát (`docs/reviews/2026-09-30-ra-soat-kien-truc.md`) thêm mục r6; sổ bàn giao thêm dòng `seq 2`. Không sửa dòng cũ.
 5. FACT — Chương I không đổi chữ → không có dòng `CHƯƠNG-I`.
+6. FACT — `tools/check_handover.py` (commit riêng): sửa luật r6 làm hai dòng bàn giao `seq 0`, `seq 1` (mang băm `1d84896b` — bản luật chúng đã đọc) bị CI chặn "law_sha256 không khớp luật hiện hành". Nay mỗi dòng mới phải mang băm của **một bản luật thật** ở commit gốc hoặc trong các commit của thay đổi; **dòng mới cuối** phải khớp luật hiện hành. Thêm 3 test (`test_law_amended_between_sessions_passes`, `test_last_entry_must_match_current_law`, `test_fake_law_hash_rejected`). Sổ bàn giao `seq 2` không nhắc việc này (viết trước khi phát hiện; không viết lại).
 
 ## Vì sao
 OPINION (Owner): giao thao tác merge cho AI để giảm việc tay; chấp nhận dấu vết Owner chuyển từ "cú bấm" sang
@@ -30,4 +31,4 @@ OPINION (Owner): giao thao tác merge cho AI để giảm việc tay; chấp nh�
 - FACT: chuỗi "MINH TRÍ TRÍ TUỆ" giữ nguyên văn như Owner ghi trong lệnh (vòng 3 ý 4 từng sửa lỗi chữ này ở ADR 0001).
 
 ## Kiểm chứng (local, base `b2767427`)
-Xem mục "Kiểm chứng r6" trong mô tả PR #3.
+unittest 67/67 OK · `minhtri.cli verify` 5 dòng xanh · `check_append_only` OK · `check_law`: "Sửa luật hợp lệ theo Chương V: …0001…, …0002…" · `check_handover`: "Sổ bàn giao: 3 dòng mới hợp lệ."

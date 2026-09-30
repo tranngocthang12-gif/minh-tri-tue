@@ -192,6 +192,31 @@ class TestHandoverGate(unittest.TestCase):
         self.commit(d, "w", touch="b.txt")
         self.assertEqual(self.check(d, base), 1)
 
+    def test_law_amended_between_sessions_passes(self):
+        # Chương V: luật sửa giữa hai phiên của cùng PR → dòng cũ giữ băm bản đã đọc, dòng cuối khớp bản mới
+        d, base = self.repo()
+        self.add_entry(d, base, session="s1"); self.commit(d, "w1")
+        open(os.path.join(d, "LUAT_KIEN_TRUC_TOI_CAO.md"), "a", encoding="utf-8").write("\nsửa\n")
+        law2 = law_sha256(d)
+        HandoverLog(os.path.join(d, "brain", "handover", "log.jsonl")).add(
+            entry(law2, session="s2", started_from=base), law2)
+        self.commit(d, "w2")
+        self.assertEqual(self.check(d, base), 0)
+
+    def test_last_entry_must_match_current_law(self):
+        d, base = self.repo()
+        self.add_entry(d, base, session="s1"); self.commit(d, "w1")
+        open(os.path.join(d, "LUAT_KIEN_TRUC_TOI_CAO.md"), "a", encoding="utf-8").write("\nsửa\n")
+        self.commit(d, "w2")
+        self.assertEqual(self.check(d, base), 1)
+
+    def test_fake_law_hash_rejected(self):
+        d, base = self.repo()
+        log = HandoverLog(os.path.join(d, "brain", "handover", "log.jsonl"))
+        log.add(entry("f" * 64, session="s1", started_from=base), "f" * 64)
+        self.add_entry(d, base, session="s2"); self.commit(d, "w")
+        self.assertEqual(self.check(d, base), 1)
+
     def test_no_entry_rejected(self):
         d, base = self.repo()
         self.commit(d, "w", touch="b.txt")

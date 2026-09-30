@@ -80,3 +80,4 @@ Phiên thi công: `claude-code-2026-09-30-pr3-r6` · vai **Ghế 1**. ADR: `docs
 | Chữ luật | Chương V.5, gạch cuối: "Owner tự tay bấm merge các PR sửa tệp được bảo vệ." → AI được bấm merge thay Owner khi đủ ba điều kiện (ACCEPT của AI khác trên đúng head · CI xanh trên head đó · lệnh Owner đúng PR, đúng head được trích lên PR trước khi bấm); AI thi công PR không được bấm merge PR đó; thiếu điều kiện → revert. |
 | Khoá | `brain/law.lock`: băm `1d84896b` → `0212d5dc`, `revision` r6, `adr` → ADR 0002. |
 | Ghi nhận | Mục vòng 1 ý 2 và vòng 3 ý 1 ở trên nói "Owner tự bấm merge" — đúng với chữ luật lúc đó, không sửa. CI chưa kiểm ba điều kiện mới (ghi "còn mở"). Chữ luật đổi → Grok cần phản biện lại head mới. |
+| CI | `tools/check_handover.py`: dòng bàn giao cũ trong PR được giữ băm bản luật đã đọc (phải là bản luật thật ở gốc hoặc trong commit của PR); dòng mới cuối phải khớp luật hiện hành. Lý do: sửa luật r6 làm `seq 0`, `seq 1` bị chặn sai. |

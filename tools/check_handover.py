@@ -2,7 +2,9 @@
 
 - Thay đổi (PR hoặc push vào main) phải ghi thêm ≥ 1 dòng sổ bàn giao.
 - Sổ phải nguyên chuỗi băm.
-- Mỗi dòng mới: đủ trường, law_sha256 khớp luật hiện hành, `session` chưa từng dùng,
+- Mỗi dòng mới: đủ trường, `session` chưa từng dùng, law_sha256 là băm của một bản luật thật có trong
+  commit gốc hoặc trong các commit của thay đổi; dòng mới CUỐI phải khớp luật hiện hành
+  (luật được sửa theo Chương V giữa các phiên của cùng một PR thì dòng cũ vẫn mang băm bản mình đã đọc),
   `started_from` = đúng điểm tách nhánh khỏi main (merge-base) — không được lấy commit cổ bất kỳ.
 - Với PR: mô tả PR (biến môi trường PR_BODY) phải có dòng bắt đầu bằng "MỞ PHIÊN ·".
 Dùng: python tools/check_handover.py <base-ref>
@@ -13,11 +15,13 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from minhtri.canon import sha256  # noqa: E402
 from minhtri.chain import ChainError  # noqa: E402
 from minhtri.handover import HandoverError, HandoverLog, law_sha256, validate  # noqa: E402
 from tools.check_append_only import resolve_base  # noqa: E402
 
 LOG = "brain/handover/log.jsonl"
+LAW = "LUAT_KIEN_TRUC_TOI_CAO.md"
 
 
 def git(*a):
@@ -27,6 +31,17 @@ def git(*a):
 def lines_at(ref, path):
     r = git("show", f"{ref}:{path}")
     return [] if r.returncode != 0 else [l for l in r.stdout.splitlines() if l.strip()]
+
+
+def law_versions(base):
+    """Băm mọi bản luật từng có ở commit gốc và trong các commit base..HEAD."""
+    refs = [base] + git("rev-list", f"{base}..HEAD", "--", LAW).stdout.split()
+    out = set()
+    for ref in refs:
+        r = git("show", f"{ref}:{LAW}")
+        if r.returncode == 0:
+            out.add(sha256(r.stdout.replace("\r\n", "\n")))
+    return out
 
 
 def main(base) -> int:
@@ -49,10 +64,13 @@ def main(base) -> int:
     fork = git("merge-base", base, "HEAD").stdout.strip()
     used = {json.loads(l)["session"] for l in old}
     law = law_sha256(".")
-    for line in new:
+    known = law_versions(base) | {law}
+    for i, line in enumerate(new):
         e = json.loads(line)
+        # dòng cuối phải đọc luật hiện hành; dòng trước đó chỉ cần đọc một bản luật thật của thay đổi này
+        expect = law if i == len(new) - 1 or e.get("law_sha256") not in known else e["law_sha256"]
         try:
-            validate(e, law)
+            validate(e, expect)
         except HandoverError as err:
             print(f"Dòng bàn giao {e.get('session')}: {err}"); return 1
         if e["session"] in used:
