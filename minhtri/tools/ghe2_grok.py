@@ -11,6 +11,9 @@ Biến môi trường:
     GITHUB_RUN_ID      mã lần chạy → session: gh-action-<run_id>
     GROK_MODEL         model Grok (mặc định grok-4)
 
+Gửi kèm toàn bộ comment trước đó trên PR (phản biện Grok cũ, trả lời Ghế 1) để
+Grok chỉ nêu điểm mới hoặc điểm chưa được trả lời thỏa đáng.
+
 Chỉ đăng comment. Không merge, không đổi mã, không gửi gì ngoài nội dung PR
 (Điều 1, Điều 2). Lỗi API → comment ngắn và thoát mã 0 (không chặn CI).
 Chỉ dùng thư viện chuẩn + `requests`; `requests` nạp muộn để test chạy không cần nó.
@@ -33,6 +36,8 @@ LAW_FILES = ("CONSTITUTION.md", "CONTRIBUTING.md", "ARCHITECTURE.md")
 # tệp luật báo cho Grok có/không trên head PR (Grok không đọc được repo)
 SUPREME_LAWS = ("LUAT_KIEN_TRUC_TOI_CAO.md", "CONSTITUTION.md")
 COMMENT_LIMIT = 65000  # GitHub giới hạn comment 65.536 ký tự
+HISTORY_LIMIT = 30000  # ký tự tối đa cho comment trước đó gửi Grok (giữ comment mới nhất)
+HISTORY_CUT_NOTE = "⚠ comment cũ hơn đã bỏ do giới hạn độ dài"
 
 
 def priority(path):
@@ -123,7 +128,40 @@ def law_status_lines(present):
     return [f"- {name}: {'có' if ok else 'chưa có tệp luật trên nhánh này'}" for name, ok in present.items()]
 
 
-def build_user_message(pr, files, diff_text, truncated, laws=None):
+def strip_usage(body):
+    """Bỏ ghi chú ẩn <!-- ghe2-usage: … --> khỏi comment (chỉ là số token)."""
+    start = body.find("<!-- ghe2-usage:")
+    if start == -1:
+        return body
+    end = body.find("-->", start)
+    return (body[:start] + (body[end + 3:] if end != -1 else "")).rstrip()
+
+
+def format_history(comments, limit=HISTORY_LIMIT):
+    """Comment trước đó trên PR (phản biện Grok cũ + trả lời Ghế 1 + khác), cũ → mới.
+
+    Tổng ≤ limit ký tự; quá thì bỏ comment cũ nhất trước và ghi rõ.
+    """
+    blocks = []
+    for c in comments:
+        user = (c.get("user") or {}).get("login", "?")
+        body = strip_usage((c.get("body") or "").strip())
+        blocks.append(f"### Comment {c.get('created_at', '?')} — {user}\n{body}\n")
+    kept, used = [], 0
+    for b in reversed(blocks):
+        if used + len(b) > limit:
+            break
+        kept.append(b)
+        used += len(b)
+    kept.reverse()
+    text = "\n".join(kept)
+    if len(kept) < len(blocks):
+        dropped = len(blocks) - len(kept)
+        text = f"{HISTORY_CUT_NOTE}: {dropped} comment.\n\n" + text
+    return text
+
+
+def build_user_message(pr, files, diff_text, truncated, laws=None, history=None):
     lines = [
         f"PHẢN BIỆN PR #{pr['number']}",
         f"Tiêu đề: {pr.get('title', '')}",
@@ -139,6 +177,9 @@ def build_user_message(pr, files, diff_text, truncated, laws=None):
               for f in files]
     if laws is not None:
         lines += ["", "## Tệp luật trên nhánh này"] + law_status_lines(laws)
+    if history is not None:
+        lines += ["", "## Comment trước đó trên PR (cũ → mới)",
+                  format_history(history) if history else "(chưa có)"]
     lines += ["", "## Diff" + (f" ({TRUNCATED_NOTE})" if truncated else ""), diff_text]
     return "\n".join(lines)
 
@@ -220,6 +261,15 @@ class GitHub:
         r.raise_for_status()
         return True
 
+    def pr_comments(self, n):
+        out, page = [], 1
+        while True:
+            batch = self._get(f"/issues/{n}/comments", per_page=100, page=page)
+            out += batch
+            if len(batch) < 100 or page >= 10:
+                return out
+            page += 1
+
     def comment(self, n, body):
         r = self.s.post(f"{self.base}/issues/{n}/comments", json={"body": body}, timeout=60)
         r.raise_for_status()
@@ -250,9 +300,10 @@ def main(env=None, gh=None, post=None):
     with open(PROMPT_PATH, encoding="utf-8") as fh:
         system_prompt = fh.read()
     laws = {name: gh.exists(name, sha) for name in SUPREME_LAWS}
-    user_message = build_user_message(pr, files, diff_text, truncated, laws)
+    history = gh.pr_comments(n)
+    user_message = build_user_message(pr, files, diff_text, truncated, laws, history)
     print(f"PR #{n} head {sha} · {len(files)} tệp · diff {len(diff_text)} ký tự"
-          f"{' (đã cắt)' if truncated else ''} · model {model}")
+          f"{' (đã cắt)' if truncated else ''} · {len(history)} comment trước · model {model}")
 
     try:
         reply, usage = call_grok(api_key, model, system_prompt, user_message, post=post)

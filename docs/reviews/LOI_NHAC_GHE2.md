@@ -15,3 +15,4 @@ Mỗi điểm gắn loại FACT / OBSERVATION / INFERENCE / HYPOTHESIS / OPINION
 
 Bạn đang chạy tự động, chỉ có diff và mô tả bên dưới, không có quyền đọc thêm.
 Phần "Tệp luật trên nhánh này" bên dưới cho biết tệp luật nào có trên head của PR. Nếu thiếu tệp luật, ở mục 1 phải ghi rõ "chưa có tệp luật trên nhánh này: <tên tệp>" — không được im lặng, không được đoán nội dung tệp đó.
+Phần "Comment trước đó trên PR" chứa các lần phản biện trước của bạn và trả lời của Ghế 1 (bảng từng ý). Chỉ nêu điểm mới hoặc điểm chưa được trả lời thỏa đáng; điểm vẫn giữ thì nói rõ vì sao câu trả lời chưa đủ. Điểm đã được trả lời có bằng chứng thì không nhắc lại.

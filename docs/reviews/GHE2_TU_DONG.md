@@ -40,4 +40,10 @@ Mỗi commit mới đẩy lên PR là một lần chạy. Số token thật củ
 - Còn hở: tệp workflow `.github/workflows/ghe2-grok.yml` với sự kiện `pull_request` vẫn lấy **từ nhánh PR** (GitHub quy định), nên PR sửa chính workflow vẫn đổi được cách chạy. Owner phải đọc kỹ PR nào đụng vào tệp này.
 - Grok được báo tệp luật (`LUAT_KIEN_TRUC_TOI_CAO.md`, `CONSTITUTION.md`) có hay chưa trên head PR; thiếu thì Grok phải ghi "chưa có tệp luật trên nhánh này".
 - Trả lời Grok dài quá giới hạn comment GitHub thì bị cắt và ghi rõ.
+- Grok được gửi kèm **toàn bộ comment trước đó trên PR** (phản biện Grok cũ, trả lời Ghế 1, comment khác; bỏ ghi chú token ẩn), tối đa 30.000 ký tự — quá thì bỏ comment cũ nhất trước và ghi rõ. Lời nhắc yêu cầu Grok chỉ nêu điểm mới hoặc điểm chưa được trả lời thỏa đáng: "Điểm đã được trả lời có bằng chứng thì không nhắc lại." Chưa gửi review comment gắn dòng mã (chỉ comment chung của PR).
 - Theo CONTRIBUTING luật 2, comment Grok tính là phản biện của AI khác nhà cung cấp, nhưng **không thay** Owner chốt merge.
+
+## Mục còn mở
+- **`pull_request_target`:** chưa dùng. Nó sẽ lấy tệp workflow từ `main` (đóng chỗ hở "PR sửa chính workflow") và cho PR từ fork nhận Secret — nhưng chạy mã của nhánh PR với Secret là rủi ro lộ khóa, nên cần thiết kế riêng (chỉ checkout `main`, không chạy mã nhánh PR). Chưa quyết; Owner chốt.
+- **PR từ fork:** chưa thử (repo chưa có fork). Với sự kiện `pull_request`, fork không nhận Secret `XAI_API_KEY` và `GITHUB_TOKEN` chỉ đọc → script đi nhánh "thiếu XAI_API_KEY", đăng comment thất bại, thoát mã 0; không có phán quyết. Cách xử lý hiện tại: maintainer chạy tay `workflow_dispatch` với số PR fork. Chưa có luật riêng cho PR fork.
+- **Workflow lấy từ nhánh PR và ngoại lệ khởi tạo PR #4:** ngoại lệ một lần; sau merge mọi PR chạy script/lời nhắc trên `main`, nhưng tệp workflow vẫn lấy từ nhánh PR (xem Giới hạn).

@@ -25,6 +25,7 @@ class FakeGitHub:
     def __init__(self, pr, files):
         self._pr, self._files, self.comments = pr, files, []
         self.present = {"CONSTITUTION.md"}
+        self.history = []
 
     def pr(self, n):
         return self._pr
@@ -34,6 +35,9 @@ class FakeGitHub:
 
     def files(self, n):
         return self._files
+
+    def pr_comments(self, n):
+        return self.history
 
     def comment(self, n, body):
         self.comments.append(body)
@@ -98,6 +102,20 @@ class TestComment(unittest.TestCase):
         self.assertEqual(g.build_error_comment("HTTP 401"), "Ghế 2 tự động lỗi: HTTP 401, không có phán quyết")
 
 
+class TestHistory(unittest.TestCase):
+    def test_history_capped_keeps_newest(self):
+        cs = [{"user": {"login": "u"}, "created_at": str(i), "body": f"c{i} " + "z" * 1000} for i in range(50)]
+        text = g.format_history(cs, limit=5000)
+        self.assertLessEqual(len(text), 5000 + 200)
+        self.assertIn(g.HISTORY_CUT_NOTE, text)
+        self.assertIn("c49 ", text)
+        self.assertNotIn("c0 ", text)
+
+    def test_strip_usage(self):
+        self.assertEqual(g.strip_usage("a\n\n<!-- ghe2-usage: {} -->\n"), "a")
+        self.assertEqual(g.strip_usage("không có"), "không có")
+
+
 class TestMain(unittest.TestCase):
     def run_main(self, post, pr_obj=None, env=None):
         gh = FakeGitHub(pr_obj or pr(), [f("minhtri/x.py", "+m")])
@@ -138,6 +156,51 @@ class TestMain(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(comments, ["Ghế 2 tự động lỗi: HTTP 401, không có phán quyết"])
         self.assertNotIn("xai-bi-mat", comments[0])
+
+    def test_http_400_temperature_rejected(self):
+        # Grok phản biện lần 2: server xAI từ chối temperature → HTTP 400
+        sent = {}
+
+        def post(url, headers, json, timeout):
+            sent.update(json=json)
+            return FakeResp(400, {"error": "temperature is not supported (Bearer xai-bi-mat)"})
+
+        rc, comments = self.run_main(post)
+        self.assertEqual(rc, 0)
+        self.assertEqual(sent["json"]["temperature"], g.TEMPERATURE)
+        self.assertEqual(comments, ["Ghế 2 tự động lỗi: HTTP 400, không có phán quyết"])
+        self.assertNotIn("xai-bi-mat", comments[0])
+        self.assertNotIn("PHÁN QUYẾT:", comments[0])
+
+    def test_previous_comments_sent_to_grok(self):
+        sent = {}
+
+        def post(url, headers, json, timeout):
+            sent.update(json=json)
+            return FakeResp(200, {"choices": [{"message": {"content": "PHÁN QUYẾT: ACCEPT — ok"}}]})
+
+        gh = FakeGitHub(pr(), [f("minhtri/x.py", "+m")])
+        gh.history = [
+            {"user": {"login": "github-actions[bot]"}, "created_at": "t1",
+             "body": "KẾT QUẢ PHẢN BIỆN — PR #7 — provider: grok\n6. temperature\n<!-- ghe2-usage: {\"x\": 1} -->"},
+            {"user": {"login": "owner"}, "created_at": "t2",
+             "body": "GHẾ 1 TRẢ LỜI PHẢN BIỆN — 6a BÁC BẰNG DỮ LIỆU: HTTP 200"},
+        ]
+        g.main(env=dict(ENV), gh=gh, post=post)
+        user = sent["json"]["messages"][1]["content"]
+        self.assertIn("## Comment trước đó trên PR", user)
+        self.assertLess(user.index("provider: grok\n6. temperature"), user.index("GHẾ 1 TRẢ LỜI PHẢN BIỆN"))
+        self.assertNotIn("ghe2-usage", user)
+        self.assertLess(user.index("## Comment trước đó"), user.index("## Diff"))
+        self.assertIn("Điểm đã được trả lời có bằng chứng thì không nhắc lại.",
+                      sent["json"]["messages"][0]["content"])
+
+    def test_no_previous_comments(self):
+        sent = {}
+        post = lambda url, headers, json, timeout: sent.update(json=json) or FakeResp(
+            200, {"choices": [{"message": {"content": "x"}}]})
+        self.run_main(post)
+        self.assertIn("## Comment trước đó trên PR (cũ → mới)\n(chưa có)", sent["json"]["messages"][1]["content"])
 
     def test_network_error(self):
         def post(*a, **k):
