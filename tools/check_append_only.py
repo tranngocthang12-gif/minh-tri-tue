@@ -6,7 +6,7 @@ Dùng: python tools/check_append_only.py <base-ref>
 import subprocess
 import sys
 
-BOOKS = ["brain/ledger/predictions.jsonl", "brain/lessons/book.jsonl"]
+BOOKS = ["brain/ledger/predictions.jsonl", "brain/lessons/book.jsonl", "brain/handover/log.jsonl"]
 
 
 def old_lines(ref: str, path: str):

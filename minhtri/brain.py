@@ -10,6 +10,7 @@ PROVIDERS = os.path.join(BRAIN, "providers.json")
 DOMAINS = os.path.join(BRAIN, "domains")
 STATE = os.path.join(BRAIN, "state.json")
 BENCHMARKS = os.path.join(ROOT, "benchmarks")
+HANDOVER = os.path.join(BRAIN, "handover", "log.jsonl")
 
 
 def load_state() -> dict:

@@ -18,7 +18,10 @@ Thứ tự bắt buộc — mã (`minhtri/inquiry.py`) chặn nhảy bước:
 4. **CON ĐƯỜNG** — bước đi, phép thử rẻ đầu tiên, **điều kiện dừng**.
 
 ## 3. Hệ điều hành quyết định (cảm hứng Bát Chánh Đạo)
-| Tinh thần | Luật thực thi trong mã |
+Bảng dưới là **một vài biểu hiện** mà tinh thần Bát Chánh Đạo gợi hướng cho hệ thống. Nó **không** định nghĩa
+lại từng chi phần, **không** phải phép ánh xạ một-đối-một chi phần → mô-đun (xem §0 và Điều 4 Luật Kiến trúc Tối cao).
+
+| Tinh thần gợi hướng | Một biểu hiện trong hệ thống |
 |---|---|
 | Chánh kiến | Mọi phát biểu gắn loại (FACT…UNKNOWN); độ tin bị trần theo cấp bằng chứng (`epistemics.py`). |
 | Chánh tư duy | Mọi chiến lược trả lời: động cơ có bị tham, sợ, FOMO làm méo không; có gây hại không cần thiết không. |
@@ -35,7 +38,9 @@ L6 Tự phản biện · L7 Học cách học · L8 Tự sửa (phát hiện →
 **Không lên cấp vì đọc nhiều — chỉ lên cấp khi có bằng chứng của cấp đó.**
 
 ## 5. Ba ghế
-Đề xuất · Phản biện · Trọng tài — **ba phiên khác nhau**. Không ai tự đề xuất, tự khen, tự duyệt.
+Đề xuất · Phản biện · Trọng tài. Người phản biện phải là **nhà cung cấp AI khác** người đề xuất, đăng phản biện dưới
+danh tính kiểm được (GitHub hoặc Owner dán nguyên văn); trọng tài cuối là **Owner** (Luật Tối cao, Điều 6).
+Mã hiện mới kiểm được "ba phiên khác nhau" — chưa kiểm khác nhà cung cấp (⚠ V2).
 Trọng tài phán theo: luận điểm → bằng chứng → phản chứng → phép thử → quyết định.
 
 ## 6. AI là nhà cung cấp, GitHub là bộ não
