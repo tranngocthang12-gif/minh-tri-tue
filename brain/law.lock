@@ -1,7 +1,7 @@
 {
-  "sha256": "1d84896be013b34186dd7787c583dcad47c638af07b8a9c9358a36aa7eaf0595",
+  "sha256": "0212d5dced50963fd01ca9da9570b068bda296bf2210bc55962da56282fb4f42",
   "version": "1.0",
-  "adr": "docs/adr/0001-luat-kien-truc-toi-cao.md",
+  "adr": "docs/adr/0002-sua-chuong-V5-ai-bam-merge.md",
   "effective": "khi PR #3 được merge vào main (ngày của commit merge)",
-  "revision": "r3 (PR #3, trước khi có hiệu lực)"
+  "revision": "r6 (PR #3, trước khi có hiệu lực — sửa Chương V.5, ADR 0002)"
 }

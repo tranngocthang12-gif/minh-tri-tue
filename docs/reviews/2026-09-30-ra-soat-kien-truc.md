@@ -69,3 +69,14 @@ Phiên trả lời: `claude-code-2026-09-30-pr3-r5` · vai **Ghế 1** (một va
 | 4 | MINOR | CHẤP NHẬN | "MINH TRÍ TRÍ TUỆ" → "MINH TRÍ TUỆ" (khớp BAN_GIAO E và mô tả repo). |
 | 5 | MINOR | CHẤP NHẬN | `brain/law.lock`: `effective` = "khi PR #3 được merge vào main (ngày của commit merge)"; ADR 0001 nói rõ. Không mã nào đọc trường này (đã `grep`). |
 | V1–V3, V11, V12, V13 | — | GHI NHẬN | Vẫn MỞ đúng như Grok xác nhận. Không đóng bằng lời. |
+
+### r6 — Owner ra lệnh sửa Chương V.5 (không phải phản biện)
+
+Nguồn: Owner ra lệnh trong chat Claude (Project MINH TRÍ TRÍ TUỆ), 30/09/2026, nguyên văn "sửa chương v.5".
+Phiên thi công: `claude-code-2026-09-30-pr3-r6` · vai **Ghế 1**. ADR: `docs/adr/0002-sua-chuong-V5-ai-bam-merge.md`.
+
+| Mục | Đã làm |
+|---|---|
+| Chữ luật | Chương V.5, gạch cuối: "Owner tự tay bấm merge các PR sửa tệp được bảo vệ." → AI được bấm merge thay Owner khi đủ ba điều kiện (ACCEPT của AI khác trên đúng head · CI xanh trên head đó · lệnh Owner đúng PR, đúng head được trích lên PR trước khi bấm); AI thi công PR không được bấm merge PR đó; thiếu điều kiện → revert. |
+| Khoá | `brain/law.lock`: băm `1d84896b` → `0212d5dc`, `revision` r6, `adr` → ADR 0002. |
+| Ghi nhận | Mục vòng 1 ý 2 và vòng 3 ý 1 ở trên nói "Owner tự bấm merge" — đúng với chữ luật lúc đó, không sửa. CI chưa kiểm ba điều kiện mới (ghi "còn mở"). Chữ luật đổi → Grok cần phản biện lại head mới. |

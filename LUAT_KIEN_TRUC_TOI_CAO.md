@@ -122,4 +122,8 @@ bị trái và đề nghị hai đường: (a) Owner sửa luật theo Chương 
    tài khoản riêng không có quyền quản trị và `main` bắt review của Owner cho tệp được bảo vệ:
    - AI **không được tự sáng tác** dòng `OWNER-APPROVED`; chỉ được ghi khi Owner ra lệnh trong chat, và phải ghi
      **nguồn** (chat/phiên nào, câu lệnh gì) ngay trên dòng đó;
-   - Owner tự tay bấm merge các PR sửa tệp được bảo vệ.
+   - Một AI được bấm merge PR sửa tệp được bảo vệ thay Owner **chỉ khi đủ cả ba**: (1) có phản biện của AI khác đăng
+     trên PR với phán quyết ACCEPT trên đúng head sẽ merge; (2) CI xanh trên head đó; (3) Owner ra lệnh merge **đúng PR
+     đó, đúng head đó** trong chat, và AI bấm merge phải trích nguyên văn câu lệnh + nguồn (chat nào, ngày) vào comment
+     trên PR **trước** khi bấm. AI thi công PR không được là AI bấm merge của PR đó. Thiếu một điều kiện thì merge là
+     vi phạm luật, phải revert.
