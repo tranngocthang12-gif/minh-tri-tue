@@ -54,3 +54,18 @@ Push nhánh bị so với commit trước **trên cùng nhánh** (`github.event.
 (sổ bàn giao, băm luật) so với nhau — chỉ không được viết lại những gì **đã vào `main`**. Hệ quả: mọi lần sửa lại
 PR (r2, r3…) làm lượt CI khi push đỏ giả. Sửa: push nhánh khác `main` so với **điểm tách khỏi `main`**
 (`git merge-base HEAD origin/main`); PR và push vào `main` giữ nguyên. Ghi nhận: lỗi của Ghế 1 (thiết kế CI), không phải của nội dung r3.
+
+
+### Vòng 3 (head `cd5c120`) — Grok APPROVE (0 BLOCKING · 2 MAJOR · 3 MINOR); Ghế 1 trả lời (r5)
+
+Phản biện nguyên văn: comment `provider: grok · session: owner-relay-2026-09-30` trên PR #3 (Owner chuyển tiếp).
+Phiên trả lời: `claude-code-2026-09-30-pr3-r5` · vai **Ghế 1** (một vai, không đổi). r5 **không đổi chữ luật** (băm vẫn `1d84896b`).
+
+| Ý | Mức | Ghế 1 | Đã làm / phản chứng |
+|---|---|---|---|
+| 1 | MAJOR | CHẤP NHẬN | Dòng `OWNER-APPROVED` của ADR 0001 đổi sang tương lai: "Owner **sẽ** tự tay bấm merge …; dòng này không chứng minh merge đã xảy ra." |
+| 2 | MAJOR | CHẤP NHẬN MỘT PHẦN | Lệch có thật **trong sổ**: dòng bàn giao `seq 0` gộp dưới một mã `claude-chat-2026-09-30-law` hai phiên thật — chat Claude (Ghế 1, viết luật; mô tả PR ghi `vai: Ghế 1`) và các phiên Claude Code (thi công CI; mục r4 ở trên tự ghi "Claude Code (thi công)", commit r4 mang `Claude-Session` riêng) — rồi ghi `role: Thi công`. Tức là lỗi **ghi sổ gộp hai phiên**, không phải một phiên đổi vai giữa chừng. Không viết lại dòng `seq 0` (xoá dấu vết đúng thứ Grok phê). Từ dòng `seq 1`: mỗi phiên một mã, một vai. CI kiểm `role` khớp mô tả PR → ghi vào "còn mở" cho v0.3 (Điều 10). |
+| 3 | MINOR | CHẤP NHẬN (phương án b) | Giữ `revision: r3` trên khoá: r4 và r5 không đổi chữ luật. ADR 0001 ghi rõ "r4 không đổi chữ luật — chỉ CI và sổ". Giới hạn: r3 và r4 nằm chung commit `cd5c120`, nên bằng chứng tách là mục r4 ở trên + dòng bàn giao, không phải diff git riêng. |
+| 4 | MINOR | CHẤP NHẬN | "MINH TRÍ TRÍ TUỆ" → "MINH TRÍ TUỆ" (khớp BAN_GIAO E và mô tả repo). |
+| 5 | MINOR | CHẤP NHẬN | `brain/law.lock`: `effective` = "khi PR #3 được merge vào main (ngày của commit merge)"; ADR 0001 nói rõ. Không mã nào đọc trường này (đã `grep`). |
+| V1–V3, V11, V12, V13 | — | GHI NHẬN | Vẫn MỞ đúng như Grok xác nhận. Không đóng bằng lời. |

@@ -25,5 +25,7 @@ Ban hành lần đầu: Chương I được **viết ra lần đầu** từ ý t
 
 ## Phiên bản
 Khoá `1.0` = bản ban hành đầu tiên. Nội dung thay đổi 3 lần **trong PR #3, trước khi có hiệu lực** (r1 → r3, theo phản biện Grok), nên không có bản nào khác từng hiệu lực; trường `revision` của `brain/law.lock` ghi lần sửa nháp.
+**r4 không đổi chữ luật** — chỉ sửa CI (`.github/workflows/ci.yml`: chọn commit gốc để so) và sổ; vì vậy khoá vẫn ghi `r3` và băm `1d84896b` là băm của chữ r3. Các lần sửa sau r4 trong PR này (vòng 3) cũng không đổi chữ luật.
+Trường `effective` của khoá = **khi PR #3 được merge vào `main`**; ngày hiệu lực thật là ngày của commit merge trên `main`, không phải ngày ghi trong tệp.
 
-OWNER-APPROVED: 2026-09-30 — nguồn: Owner ra lệnh trong chat Claude (Project MINH TRÍ TRÍ TUỆ, phiên claude-chat-2026-09-30-law): "XÂY BỘ LUẬT KIẾN TRÚC TỐI CAO, BẢO VỆ Ý TƯỞNG KIẾN TRÚC. VÀ CÓ LUẬT BÀN GIAO". Owner tự tay bấm merge PR (Chương V.5).
+OWNER-APPROVED: 2026-09-30 — nguồn: Owner ra lệnh trong chat Claude (Project MINH TRÍ TUỆ, phiên claude-chat-2026-09-30-law): "XÂY BỘ LUẬT KIẾN TRÚC TỐI CAO, BẢO VỆ Ý TƯỞNG KIẾN TRÚC. VÀ CÓ LUẬT BÀN GIAO". Owner **sẽ** tự tay bấm merge PR (Chương V.5); dòng này không chứng minh merge đã xảy ra.

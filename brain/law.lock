@@ -2,6 +2,6 @@
   "sha256": "1d84896be013b34186dd7787c583dcad47c638af07b8a9c9358a36aa7eaf0595",
   "version": "1.0",
   "adr": "docs/adr/0001-luat-kien-truc-toi-cao.md",
-  "effective": "2026-09-30",
+  "effective": "khi PR #3 được merge vào main (ngày của commit merge)",
   "revision": "r3 (PR #3, trước khi có hiệu lực)"
 }
