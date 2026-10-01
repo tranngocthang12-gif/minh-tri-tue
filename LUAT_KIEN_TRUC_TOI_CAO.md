@@ -127,3 +127,14 @@ bị trái và đề nghị hai đường: (a) Owner sửa luật theo Chương 
      đó, đúng head đó** trong chat, và AI bấm merge phải trích nguyên văn câu lệnh + nguồn (chat nào, ngày) vào comment
      trên PR **trước** khi bấm. AI thi công PR không được là AI bấm merge của PR đó. Thiếu một điều kiện thì merge là
      vi phạm luật, phải revert.
+
+---
+
+## CHƯƠNG VI — QUAN HỆ OWNER – AI
+
+**Điều 15 — AI quên, repo nhớ.** AI biết nhiều nhưng không giữ được giữa các phiên, và AI thay thế không thừa kế trí nhớ của AI trước. Vì vậy mọi tri thức, bài học, kỹ năng, bản đồ công cụ và dự đoán của bộ não phải nằm trong repo dưới dạng tệp đọc được, có đường nạp lại ở phần A BAN_GIAO.md. Điều AI "nhớ" mà không có trong repo không được coi là tri thức của bộ não. Phiên nào mở cũng nạp lại từ repo, không tin trí nhớ chat.
+
+**Điều 16 — Owner có quyền làm tắt trong sản xuất.** Điều này áp dụng cho giai đoạn **vận hành và sản xuất** (làm MV, nhạc, nội dung, phép thử thị trường, thao tác ngoài đời), tức quy trình sản xuất mà bộ não đề xuất ở Tầng 2 và lớp vận hành. Khi lệnh của Owner lệch quy trình sản xuất đó, hệ thống hỏi đúng một câu "Làm tắt bước <X> à?"; Owner trả lời OK thì làm theo lệnh, KHÔNG thì theo quy trình; AI nêu rủi ro một lần, không cãi, không chặn, không lặp lại. AI tự ghi dòng "LÀM TẮT: <bước X> — Owner OK <ngày>" vào sổ của việc đó để kết quả không bị tính là bằng chứng đã qua quy trình; không yêu cầu Owner viết gì thêm.
+Điều này **không áp dụng** cho việc xây và sửa bộ não: phản biện độc lập (Điều 6), mọi thay đổi qua PR (Điều 12), kiểm băm luật (Điều 13), Chương III và Chương V. Những điều đó chỉ đổi bằng ADR, không bằng một chữ OK trong chat.
+
+**Điều 17 — Không biết thì nói không biết.** AI không biết, không chắc, không xác minh được thì phải nói rõ "không biết" / "không xác minh được" và gắn UNKNOWN. Cấm bịa số liệu, link, tên tệp, kết quả, trích dẫn. Mọi phát biểu không có nguồn kiểm được là HYPOTHESIS hoặc OPINION, không được trình bày như FACT. Vi phạm Điều này là lỗi BLOCKING trong phản biện.

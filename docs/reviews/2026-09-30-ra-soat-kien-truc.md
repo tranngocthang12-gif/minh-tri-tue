@@ -81,3 +81,27 @@ Phiên thi công: `claude-code-2026-09-30-pr3-r6` · vai **Ghế 1**. ADR: `docs
 | Khoá | `brain/law.lock`: băm `1d84896b` → `0212d5dc`, `revision` r6, `adr` → ADR 0002. |
 | Ghi nhận | Mục vòng 1 ý 2 và vòng 3 ý 1 ở trên nói "Owner tự bấm merge" — đúng với chữ luật lúc đó, không sửa. CI chưa kiểm ba điều kiện mới (ghi "còn mở"). Chữ luật đổi → Grok cần phản biện lại head mới. |
 | CI | `tools/check_handover.py`: dòng bàn giao cũ trong PR được giữ băm bản luật đã đọc (phải là bản luật thật ở gốc hoặc trong commit của PR); dòng mới cuối phải khớp luật hiện hành. Lý do: sửa luật r6 làm `seq 0`, `seq 1` bị chặn sai. |
+
+### r7 — Owner ra lệnh thêm Chương VI "Quan hệ Owner – AI" (01/10/2026, Lệnh 7; không phải phản biện)
+
+Nguồn: chat Claude, Project MINH TRÍ TRÍ TUỆ, 01/10/2026 (nguyên văn trong ADR 0003).
+Phiên thi công: `claude-code-2026-10-01-chuong-VI` · vai **Ghế 1**. ADR: `docs/adr/0003-chuong-VI-quan-he-owner-ai.md`.
+
+| Mục | Đã làm |
+|---|---|
+| Chữ luật | Thêm Chương VI (Điều 15 AI quên, repo nhớ · Điều 16 Owner có quyền làm tắt · Điều 17 Không biết thì nói không biết) đúng nguyên văn lệnh. Chương I–V không đổi chữ. |
+| Khoá | `brain/law.lock`: băm `0212d5dc` → mới, `version` 1.1, `revision` r7, `adr` → ADR 0003. |
+| Mâu thuẫn | 6 điểm ghi ở ADR 0003 mục "Còn mở" (Điều 16 ↔ Chương III, BAN_GIAO A.5/E, Điều 6/10/12, phạm vi Điều 16, V12, dấu ⚠ V14/V15). Không tự sửa điều cũ; chờ Owner. |
+| Sổ nợ | `docs/NO_VI_HIEN.md` thêm V14, V15 (từ Issue #2); V11 giữ MỞ. |
+
+### r8 — Grok REJECT trên head `254e547`; Owner viết lại Điều 16 (01/10/2026, Lệnh 9)
+
+Phản biện: comment `provider: grok · session: gh-action-36821230577` trên PR #5 (REJECT). Trả lời Ghế 1 r7: comment `5925522603`.
+Phiên thi công: `claude-code-2026-10-01-chuong-VI-r8` · vai **Ghế 1**.
+
+| Mục | Đã làm |
+|---|---|
+| Chữ luật | Điều 16 viết lại nguyên văn Lệnh 9: chỉ áp dụng cho **vận hành và sản xuất**; **không** áp dụng cho việc xây và sửa bộ não (Điều 6, 12, 13, Chương III, V). Điều 15, 17 và Chương I–V không đổi. |
+| Khoá | `brain/law.lock`: băm `cb81cf51` → `4c58397e`, `revision` r8, `version` giữ 1.1. |
+| ADR 0003 | Chữ Điều 16 mới; dòng `OWNER-APPROVED` thứ hai (nguyên văn Owner, r8); mục "Còn mở" bỏ mâu thuẫn 1–4 (đã giải bằng tách phạm vi), giữ 5 (V12), 6 (⚠ V14/V15). |
+| Ghi nhận | Dòng bàn giao seq 4 không sửa. Chữ "LÀM TẮT" trong seq 4 chỉ nằm ở mục `open` (nhắc nợ CI), chưa có bước nào làm tắt. |

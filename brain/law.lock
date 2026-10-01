@@ -1,7 +1,7 @@
 {
-  "sha256": "0212d5dced50963fd01ca9da9570b068bda296bf2210bc55962da56282fb4f42",
-  "version": "1.0",
-  "adr": "docs/adr/0002-sua-chuong-V5-ai-bam-merge.md",
-  "effective": "khi PR #3 được merge vào main (ngày của commit merge)",
-  "revision": "r6 (PR #3, trước khi có hiệu lực — sửa Chương V.5, ADR 0002)"
+  "sha256": "4c58397e894d6aea53e1ee19e9178eebf8d7b310ce6d65cc3f82a43991b0a7a8",
+  "version": "1.1",
+  "adr": "docs/adr/0003-chuong-VI-quan-he-owner-ai.md",
+  "effective": "khi PR Chương VI được merge vào main (ngày của commit merge)",
+  "revision": "r8 (Chương VI, viết lại Điều 16 theo Lệnh 9 — phạm vi sản xuất, ADR 0003)"
 }
