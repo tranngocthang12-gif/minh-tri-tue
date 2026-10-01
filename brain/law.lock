@@ -1,7 +1,7 @@
 {
-  "sha256": "cb81cf51c40478ad5a1f72dc4289cda3f92d4a4d8b28d4954ea699b98e5881be",
+  "sha256": "4c58397e894d6aea53e1ee19e9178eebf8d7b310ce6d65cc3f82a43991b0a7a8",
   "version": "1.1",
   "adr": "docs/adr/0003-chuong-VI-quan-he-owner-ai.md",
   "effective": "khi PR Chương VI được merge vào main (ngày của commit merge)",
-  "revision": "r7 (thêm Chương VI — Điều 15, 16, 17, ADR 0003)"
+  "revision": "r8 (Chương VI, viết lại Điều 16 theo Lệnh 9 — phạm vi sản xuất, ADR 0003)"
 }
