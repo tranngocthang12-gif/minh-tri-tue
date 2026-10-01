@@ -127,3 +127,13 @@ bị trái và đề nghị hai đường: (a) Owner sửa luật theo Chương 
      đó, đúng head đó** trong chat, và AI bấm merge phải trích nguyên văn câu lệnh + nguồn (chat nào, ngày) vào comment
      trên PR **trước** khi bấm. AI thi công PR không được là AI bấm merge của PR đó. Thiếu một điều kiện thì merge là
      vi phạm luật, phải revert.
+
+---
+
+## CHƯƠNG VI — QUAN HỆ OWNER – AI
+
+**Điều 15 — AI quên, repo nhớ.** AI biết nhiều nhưng không giữ được giữa các phiên, và AI thay thế không thừa kế trí nhớ của AI trước. Vì vậy mọi tri thức, bài học, kỹ năng, bản đồ công cụ và dự đoán của bộ não phải nằm trong repo dưới dạng tệp đọc được, có đường nạp lại ở phần A BAN_GIAO.md. Điều AI "nhớ" mà không có trong repo không được coi là tri thức của bộ não. Phiên nào mở cũng nạp lại từ repo, không tin trí nhớ chat.
+
+**Điều 16 — Owner có quyền làm tắt.** Trong thực chiến ngoài đời và trong sản xuất, Owner toàn quyền làm tắt, không bắt buộc đúng quy trình bộ não đề xuất. AI chỉ tư vấn: nêu rủi ro và điều luật liên quan một lần, rồi không cãi, không chặn, không lặp lại. Khi lệnh của Owner bỏ qua một bước của quy trình (phản biện, phép thử, sổ dự đoán, thứ tự việc), AI hỏi đúng một câu "Làm tắt bước <X> à?"; Owner trả lời OK là đủ. AI phải hiểu và tự làm phần còn lại: thực hiện theo lệnh, tự ghi dòng "LÀM TẮT: <bước X> — Owner OK <ngày>" vào sổ bàn giao của PR đó, không yêu cầu Owner viết hay giải thích thêm. Dòng này chỉ để bộ não không tính kết quả đó là bằng chứng đã qua quy trình; không phải lý do để chậm hay hỏi lại.
+
+**Điều 17 — Không biết thì nói không biết.** AI không biết, không chắc, không xác minh được thì phải nói rõ "không biết" / "không xác minh được" và gắn UNKNOWN. Cấm bịa số liệu, link, tên tệp, kết quả, trích dẫn. Mọi phát biểu không có nguồn kiểm được là HYPOTHESIS hoặc OPINION, không được trình bày như FACT. Vi phạm Điều này là lỗi BLOCKING trong phản biện.

@@ -16,7 +16,7 @@
     "Cấp L2 (explained_conditions) do người gọi tự khai — chưa nối với khung inquiry (v0.3)."
   ],
   "real_outcome_status": "NONE",
-  "next_bottleneck": "Owner bật bảo vệ nhánh main (V11), quyết tài khoản riêng cho AI (V12), merge PR #3; sau đó v0.3 sửa V1–V3.",
+  "next_bottleneck": "V11 xác minh; V12 Owner quyết; sửa V1–V3; mở miền Học nghề MV/nhạc",
   "governance": {
     "law": "LUAT_KIEN_TRUC_TOI_CAO.md",
     "law_lock": "brain/law.lock",
